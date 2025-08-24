@@ -3,7 +3,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import { useMainStore } from '../store/mainStore'
 
 vi.mock('../lib/db', () => ({}))
-vi.mock('axios', () => ({
+vi.mock('../lib/http', () => ({
   default: {
     post: vi.fn(),
   },
@@ -11,8 +11,8 @@ vi.mock('axios', () => ({
 
 import { getBaseURL, login } from '../lib/api'
 
-import axios from 'axios'
-const mockedAxios = axios as unknown as { post: ReturnType<typeof vi.fn> }
+import http from '../lib/http'
+const mockedHttp = http as unknown as { post: ReturnType<typeof vi.fn> }
 
 describe('api helpers', () => {
   beforeEach(() => {
@@ -21,18 +21,18 @@ describe('api helpers', () => {
   })
 
   it('getBaseURL returns domain', async () => {
-    mockedAxios.post.mockResolvedValue({ data: { baseURL: 'http://base' } })
+    mockedHttp.post.mockResolvedValue({ data: { baseURL: 'http://base' } })
     const url = await getBaseURL({ email: 'e', password: 'p' })
     expect(url).toBe('http://base')
   })
 
   it('getBaseURL rejects on error', async () => {
-    mockedAxios.post.mockRejectedValue(new Error('fail'))
+    mockedHttp.post.mockRejectedValue(new Error('fail'))
     await expect(getBaseURL({ email: 'e', password: 'p' })).rejects.toThrow('fail')
   })
 
   it('login sets store data', async () => {
-    mockedAxios.post
+    mockedHttp.post
       .mockResolvedValueOnce({ data: { baseURL: 'http://base' } })
       .mockResolvedValueOnce({
         data: { token: 't', locations: [1], settings: { s: true } },
@@ -46,7 +46,7 @@ describe('api helpers', () => {
   })
 
   it('login rejects on failure', async () => {
-    mockedAxios.post
+    mockedHttp.post
       .mockResolvedValueOnce({ data: { baseURL: 'http://base' } })
       .mockRejectedValueOnce(new Error('fail'))
     await expect(login({ email: 'e', password: 'p' })).rejects.toThrow('fail')
