@@ -24,13 +24,17 @@ async function onLogin() {
 <template>
   <IonPage>
     <IonContent class="ion-padding">
-      <form @submit.prevent="onLogin" class="flex flex-col gap-4">
+      <form
+        @submit.prevent="onLogin"
+        class="flex flex-col gap-4 max-w-md mx-auto"
+      >
         <IonInput
           v-model="email"
           type="email"
           label="Email"
           label-placement="floating"
           required
+          class="text-lg"
         />
         <IonInput
           v-model="password"
@@ -38,17 +42,16 @@ async function onLogin() {
           label="Password"
           label-placement="floating"
           required
+          class="text-lg"
         />
-        <IonButton type="submit" expand="block">Login</IonButton>
+        <IonButton
+          type="submit"
+          expand="block"
+          class="py-4 text-lg"
+        >
+          Login
+        </IonButton>
       </form>
     </IonContent>
   </IonPage>
 </template>
-
-<style scoped>
-form {
-  max-width: 400px;
-  margin: 0 auto;
-}
-</style>
-
