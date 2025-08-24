@@ -76,7 +76,7 @@ export const useMainStore = defineStore(
 
     async function login(email: string, password: string) {
       const url = await getBaseURL({ email, password })
-      const { data } = await http.post(`${url}/store-login`, {
+      const { data } = await http.post(`${url}/callcenter-login`, {
         email,
         password,
       })
@@ -220,7 +220,7 @@ export const useMainStore = defineStore(
       }
       if (isOnline.value && baseURL.value && token.value) {
         try {
-          await http.post(`${baseURL.value}/place-order`, order, {
+          await http.post(`${baseURL.value}/kiosk-order`, order, {
             headers: { Authorization: `Bearer ${token.value}` },
           })
           await createOrder(order, 1)
