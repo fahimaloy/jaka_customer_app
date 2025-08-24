@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonImg, IonButton } from '@ionic/vue'
+import {
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonImg,
+  IonButton
+} from '@ionic/vue'
 import { computed, defineProps, defineEmits } from 'vue'
 import type { Item } from '../lib/db'
 
@@ -18,25 +25,18 @@ function add() {
 
 <template>
   <IonCard
-    v-motion="{
-      initial: { opacity: 0, y: 10 },
-      enter: { opacity: 1, y: 0 }
-    }"
-    class="h-full flex flex-col gap-2"
+    v-motion="{ initial: { opacity: 0, y: 20 }, enter: { opacity: 1, y: 0 } }"
+    class="h-full flex flex-col hover:shadow-xl transition-shadow"
   >
-    <IonImg :src="imageSrc" class="object-cover h-32 w-full" />
-    <IonCardHeader>
-      <IonCardTitle class="text-base">{{ props.item.name }}</IonCardTitle>
+    <IonImg :src="imageSrc" class="object-cover h-32 w-full rounded-t" />
+    <IonCardHeader class="p-4 flex-1 flex flex-col">
+      <IonCardTitle class="text-lg font-semibold">{{ props.item.name }}</IonCardTitle>
+      <p class="mt-1 text-gray-600">${{ props.item.price.toFixed(2) }}</p>
     </IonCardHeader>
-    <IonCardContent class="mt-auto">
-      <IonButton
-        expand="block"
-        @click="add"
-        class="py-3 text-base"
-      >
+    <IonCardContent>
+      <IonButton expand="block" @click="add" class="py-3 text-base">
         Add to cart
       </IonButton>
     </IonCardContent>
   </IonCard>
 </template>
-

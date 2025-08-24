@@ -1,18 +1,27 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { IonPage, IonContent, IonButton } from '@ionic/vue'
+import {
+  IonPage,
+  IonContent,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButton,
+  IonIcon
+} from '@ionic/vue'
+import { cartOutline } from 'ionicons/icons'
 import CategoryList from '../components/CategoryList.vue'
 import ItemGrid from '../components/ItemGrid.vue'
+import CartDrawer from '../components/CartDrawer.vue'
 import { useMainStore } from '../store/mainStore'
 import type { Item } from '../lib/db'
-import { useRouter } from 'vue-router'
 
 type ItemWithImage = Item & { image_link?: string; category_id?: string; category?: string }
 interface Category { id: string; name: string }
 
 const store = useMainStore()
 const selected = ref<string | null>(null)
-const router = useRouter()
+const cartOpen = ref(false)
 
 const categories = computed(() => (store.categories as Category[]) || [])
 const items = computed<ItemWithImage[]>(() => {
@@ -22,6 +31,9 @@ const items = computed<ItemWithImage[]>(() => {
     (i) => i.category_id === selected.value || i.category === selected.value
   )
 })
+const cartCount = computed(() =>
+  store.cart.reduce((sum, c) => sum + c.quantity, 0)
+)
 
 function handleSelect(id: string | null) {
   selected.value = id
@@ -29,23 +41,27 @@ function handleSelect(id: string | null) {
 function handleAdd(item: ItemWithImage) {
   store.addToCart(item)
 }
-
-function goManualSync() {
-  router.push('/manual-sync')
-}
 </script>
 
 <template>
   <IonPage class="kiosk-theme">
-    <IonContent class="p-4 space-y-6">
-      <div class="flex justify-end">
-        <IonButton
-          class="btn-lg text-xl bg-blue-600 text-white"
-          @click="goManualSync"
-        >
-          Manual Sync
+    <IonHeader>
+      <IonToolbar class="bg-yellow-200 flex items-center justify-between px-4">
+        <div class="flex items-center gap-2">
+          <img src="/logo-placeholder.svg" alt="logo" class="h-10 w-10" />
+          <IonTitle class="text-2xl font-bold">Menu</IonTitle>
+        </div>
+        <IonButton fill="clear" @click="cartOpen = true" class="relative">
+          <IonIcon :icon="cartOutline" class="text-3xl" />
+          <span
+            v-if="cartCount"
+            class="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center"
+            >{{ cartCount }}</span
+          >
         </IonButton>
-      </div>
+      </IonToolbar>
+    </IonHeader>
+    <IonContent class="p-4 space-y-6">
       <CategoryList
         :categories="categories"
         :selected="selected"
@@ -53,5 +69,6 @@ function goManualSync() {
       />
       <ItemGrid :items="items" @add="handleAdd" />
     </IonContent>
+    <CartDrawer :open="cartOpen" @close="cartOpen = false" />
   </IonPage>
 </template>
