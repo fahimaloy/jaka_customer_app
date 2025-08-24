@@ -17,13 +17,25 @@ function add() {
 </script>
 
 <template>
-  <IonCard class="h-full flex flex-col">
+  <IonCard
+    v-motion="{
+      initial: { opacity: 0, y: 10 },
+      enter: { opacity: 1, y: 0 }
+    }"
+    class="h-full flex flex-col gap-2"
+  >
     <IonImg :src="imageSrc" class="object-cover h-32 w-full" />
     <IonCardHeader>
-      <IonCardTitle>{{ props.item.name }}</IonCardTitle>
+      <IonCardTitle class="text-base">{{ props.item.name }}</IonCardTitle>
     </IonCardHeader>
     <IonCardContent class="mt-auto">
-      <IonButton expand="block" @click="add">Add to cart</IonButton>
+      <IonButton
+        expand="block"
+        @click="add"
+        class="py-3 text-base"
+      >
+        Add to cart
+      </IonButton>
     </IonCardContent>
   </IonCard>
 </template>

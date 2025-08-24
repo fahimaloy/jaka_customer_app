@@ -7,12 +7,14 @@ import '@ionic/vue/css/core.css'
 import App from './App.vue'
 import { dbReady } from './lib/db'
 import { useMainStore } from './store/mainStore'
+import { MotionPlugin } from '@vueuse/motion'
 
 const app = createApp(App)
 const pinia = createPinia()
 pinia.use(persisted)
 app.use(IonicVue)
 app.use(pinia)
+app.use(MotionPlugin)
 
 const mainStore = useMainStore()
 
