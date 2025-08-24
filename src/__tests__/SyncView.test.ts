@@ -22,7 +22,13 @@ import { handleError } from '../lib/errorHandler'
 
 const stubs = {
   IonPage: { name: 'IonPage', template: '<div><slot/></div>' },
-  IonContent: { name: 'IonContent', template: '<div><slot/></div>' }
+  IonContent: { name: 'IonContent', template: '<div><slot/></div>' },
+  IonList: { name: 'IonList', template: '<ul><slot/></ul>' },
+  IonItem: { name: 'IonItem', template: '<li><slot/></li>' },
+  IonLabel: { name: 'IonLabel', template: '<span><slot/></span>' },
+  IonSpinner: { name: 'IonSpinner', template: '<span />' },
+  IonIcon: { name: 'IonIcon', props: ['icon'], template: '<i />' },
+  IonProgressBar: { name: 'IonProgressBar', props: ['value'], template: '<progress :value="value"></progress>' }
 }
 
 describe('SyncView', () => {

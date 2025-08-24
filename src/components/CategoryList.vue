@@ -23,7 +23,7 @@ function onChange(ev: CustomEvent) {
   >
     <IonSegmentButton
       value=""
-      class="btn-lg bg-red-500 text-white"
+      class="btn-lg bg-red-500 hover:bg-red-600 text-white rounded-full transition-transform transform hover:scale-105"
       aria-label="All categories"
     >
       <IonLabel class="text-xl font-semibold">All</IonLabel>
@@ -32,7 +32,7 @@ function onChange(ev: CustomEvent) {
       v-for="cat in props.categories"
       :key="cat.id"
       :value="cat.id"
-      class="btn-lg bg-red-500 text-white"
+      class="btn-lg bg-red-500 hover:bg-red-600 text-white rounded-full transition-transform transform hover:scale-105"
       :aria-label="cat.name"
     >
       <IonLabel class="text-xl font-semibold">{{ cat.name }}</IonLabel>
