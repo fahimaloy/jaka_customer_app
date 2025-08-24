@@ -3,48 +3,130 @@ import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacito
 let sqlite: SQLiteConnection;
 let db: SQLiteDBConnection;
 
-const tableSchemas: Record<string, string> = {
-  items: `CREATE TABLE IF NOT EXISTS items (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    price REAL NOT NULL
-  );`,
-  customers: `CREATE TABLE IF NOT EXISTS customers (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL
-  );`,
-  orders: `CREATE TABLE IF NOT EXISTS orders (
-    id TEXT PRIMARY KEY,
-    customer_id TEXT,
-    items TEXT,
-    is_synced INTEGER DEFAULT 0,
-    created_at TEXT DEFAULT (datetime('now'))
-  );`,
-  barcodes: `CREATE TABLE IF NOT EXISTS barcodes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    item_id TEXT,
-    code TEXT UNIQUE
-  );`,
-  shift_summaries: `CREATE TABLE IF NOT EXISTS shift_summaries (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT,
-    total_sales REAL
-  );`
+export interface TableSchema {
+  create: string;
+  columns: Record<string, string>;
+}
+
+export const tableSchemas: Record<string, TableSchema> = {
+  items: {
+    create: `CREATE TABLE IF NOT EXISTS items (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      price REAL NOT NULL,
+      image TEXT
+    );`,
+    columns: {
+      id: 'id TEXT PRIMARY KEY',
+      name: 'name TEXT NOT NULL',
+      price: 'price REAL NOT NULL',
+      image: 'image TEXT',
+    },
+  },
+  customers: {
+    create: `CREATE TABLE IF NOT EXISTS customers (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT,
+      phone TEXT
+    );`,
+    columns: {
+      id: 'id TEXT PRIMARY KEY',
+      name: 'name TEXT NOT NULL',
+      email: 'email TEXT',
+      phone: 'phone TEXT',
+    },
+  },
+  orders: {
+    create: `CREATE TABLE IF NOT EXISTS orders (
+      id TEXT PRIMARY KEY,
+      customer_id TEXT,
+      items TEXT,
+      total REAL,
+      is_synced INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    );`,
+    columns: {
+      id: 'id TEXT PRIMARY KEY',
+      customer_id: 'customer_id TEXT',
+      items: 'items TEXT',
+      total: 'total REAL',
+      is_synced: 'is_synced INTEGER DEFAULT 0',
+      created_at: "created_at TEXT DEFAULT (datetime('now'))",
+    },
+  },
+  barcodes: {
+    create: `CREATE TABLE IF NOT EXISTS barcodes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      item_id TEXT,
+      code TEXT UNIQUE
+    );`,
+    columns: {
+      id: 'id INTEGER PRIMARY KEY AUTOINCREMENT',
+      item_id: 'item_id TEXT',
+      code: 'code TEXT UNIQUE',
+    },
+  },
+  item_units: {
+    create: `CREATE TABLE IF NOT EXISTS item_units (
+      id TEXT PRIMARY KEY,
+      item_id TEXT NOT NULL,
+      unit TEXT NOT NULL,
+      price REAL NOT NULL,
+      image TEXT
+    );`,
+    columns: {
+      id: 'id TEXT PRIMARY KEY',
+      item_id: 'item_id TEXT NOT NULL',
+      unit: 'unit TEXT NOT NULL',
+      price: 'price REAL NOT NULL',
+      image: 'image TEXT',
+    },
+  },
+};
+
+export interface DBLike {
+  execute: (sql: string) => Promise<any>;
+  query: (sql: string) => Promise<{ values?: any[] }>;
+}
+
+const SCHEMA_VERSION = 1;
+
+export const runMigrations = async (conn: DBLike): Promise<void> => {
+  const versionRes = await conn.query('PRAGMA user_version');
+  const currentVersion = versionRes.values?.[0]?.user_version ?? 0;
+
+  for (const { create } of Object.values(tableSchemas)) {
+    await conn.execute(create);
+  }
+
+  for (const [table, schema] of Object.entries(tableSchemas)) {
+    const info = await conn.query(`PRAGMA table_info(${table});`);
+    const existing = info.values?.map((r: any) => r.name) ?? [];
+    for (const [col, def] of Object.entries(schema.columns)) {
+      if (!existing.includes(col)) {
+        await conn.execute(`ALTER TABLE ${table} ADD COLUMN ${def};`);
+      }
+    }
+  }
+
+  if (currentVersion < SCHEMA_VERSION) {
+    await conn.execute(`PRAGMA user_version = ${SCHEMA_VERSION}`);
+  }
 };
 
 export const dbReady = (async () => {
   sqlite = new SQLiteConnection(CapacitorSQLite);
   db = await sqlite.createConnection('app_db', false, 'no-encryption', 1, false);
   await db.open();
-  for (const schema of Object.values(tableSchemas)) {
-    await db.execute(schema);
-  }
+  await runMigrations(db);
 })();
 
 export interface Item {
   id: string;
   name: string;
   price: number;
+  image?: string;
 }
 
 export interface Customer {
@@ -64,9 +146,9 @@ export interface Order {
 }
 
 export const bulkInsertItems = async (items: Item[]): Promise<void> => {
-  const stmt = `INSERT OR REPLACE INTO items (id, name, price) VALUES (?, ?, ?)`;
+  const stmt = `INSERT OR REPLACE INTO items (id, name, price, image) VALUES (?, ?, ?, ?)`;
   for (const item of items) {
-    await db.run(stmt, [item.id, item.name, item.price]);
+    await db.run(stmt, [item.id, item.name, item.price, item.image ?? null]);
   }
 };
 
@@ -103,6 +185,6 @@ export const getCustomersList = async (): Promise<Customer[]> => {
 };
 
 export const getItemsList = async (): Promise<Item[]> => {
-  const result = await db.query(`SELECT id, name, price FROM items`);
-  return result.values as Item[] ?? [];
+  const result = await db.query(`SELECT id, name, price, image FROM items`);
+  return (result.values as Item[] ?? []);
 };
