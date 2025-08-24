@@ -198,7 +198,7 @@ export const useMainStore = defineStore(
     function filterItems(category: string | null) {
       if (!category) return items.value
       return items.value.filter(
-        (i) => i.category_id === category || (i as any).category === category
+        (i: any) => i.category_id === category || i.category === category
       )
     }
 
@@ -240,7 +240,7 @@ export const useMainStore = defineStore(
 
     async function factoryReset() {
       try {
-        await CapacitorSQLite.deleteDatabase({ database: 'app_db', version: 1 })
+        await CapacitorSQLite.deleteDatabase({ database: 'app_db' })
       } catch {}
 
       try {

@@ -48,9 +48,17 @@ echo "2) Launch Android Studio (npx cap open android)"
 read -r -p "Enter choice [1/2]: " choice
 
 if [[ "$choice" == "1" ]]; then
+  log "Building web assets (npm run build)"
+  npm run build || exit 1
+  log "Syncing Capacitor Android project (npx cap sync android)"
+  npx cap sync android || exit 1
   log "Running CLI build (npx cap build android)"
   npx cap build android
 elif [[ "$choice" == "2" ]]; then
+  log "Building web assets (npm run build)"
+  npm run build || exit 1
+  log "Syncing Capacitor Android project (npx cap sync android)"
+  npx cap sync android || exit 1
   log "Opening Android Studio (npx cap open android)"
   npx cap open android
 else
