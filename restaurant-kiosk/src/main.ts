@@ -3,10 +3,13 @@ import { createPinia } from 'pinia'
 import persisted from 'pinia-plugin-persistedstate'
 import './main.css'
 import App from './App.vue'
+import { dbReady } from './lib/db'
 
 const app = createApp(App)
 const pinia = createPinia()
 pinia.use(persisted)
 app.use(pinia)
 
-app.mount('#app')
+dbReady
+  .then(() => app.mount('#app'))
+  .catch((err) => console.error('Database initialization failed', err))
