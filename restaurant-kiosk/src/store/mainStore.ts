@@ -124,6 +124,23 @@ export const useMainStore = defineStore(
       }
     }
 
+    async function syncSettings() {
+      if (!baseURL.value || !token.value) return
+      const loading = await loadingController.create({ message: 'Syncing settings...' })
+      await loading.present()
+      try {
+        const { data } = await http.get(`${baseURL.value}/settings`, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        })
+        settings.value = data
+        await showToast('Settings synced')
+      } catch (err) {
+        handleError(err)
+      } finally {
+        await loading.dismiss()
+      }
+    }
+
     function addToCart(item: Item) {
       const existing = cart.value.find((c) => c.item.id === item.id)
       if (existing) {
@@ -182,9 +199,10 @@ export const useMainStore = defineStore(
       cart,
       phone,
       login,
-      syncItems,
-      syncCustomers,
-      addToCart,
+        syncItems,
+        syncCustomers,
+        syncSettings,
+        addToCart,
       removeFromCart,
       placeOrder,
       clearCart,

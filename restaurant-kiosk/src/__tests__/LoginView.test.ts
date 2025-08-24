@@ -4,12 +4,10 @@ import LoginView from '../views/LoginView.vue'
 import { vi } from 'vitest'
 
 const login = vi.fn()
-const syncItems = vi.fn()
-const syncCustomers = vi.fn()
 const push = vi.fn()
 
 vi.mock('../store/mainStore', () => ({
-  useMainStore: () => ({ login, syncItems, syncCustomers }),
+  useMainStore: () => ({ login }),
 }))
 
 vi.mock('vue-router', () => ({
@@ -42,46 +40,39 @@ describe('LoginView', () => {
     },
   }
 
-  beforeEach(() => {
-    login.mockReset()
-    syncItems.mockReset()
-    syncCustomers.mockReset()
-    push.mockReset()
-    handleError.mockReset()
-  })
+    beforeEach(() => {
+      login.mockReset()
+      push.mockReset()
+      handleError.mockReset()
+    })
 
   it('logs in and navigates on success', async () => {
-    login.mockResolvedValue(undefined)
-    syncItems.mockResolvedValue(undefined)
-    syncCustomers.mockResolvedValue(undefined)
-    const { getByPlaceholderText, container } = render(LoginView, {
-      global: { stubs },
+      login.mockResolvedValue(undefined)
+      const { getByPlaceholderText, container } = render(LoginView, {
+        global: { stubs },
+      })
+      await fireEvent.update(getByPlaceholderText('Email'), 'e@test.com')
+      await fireEvent.update(getByPlaceholderText('Password'), 'pw')
+      const form = container.querySelector('form') as HTMLFormElement
+      await fireEvent.submit(form)
+      await flushPromises()
+      expect(login).toHaveBeenCalledWith('e@test.com', 'pw')
+      expect(push).toHaveBeenCalledWith('/sync')
     })
-    await fireEvent.update(getByPlaceholderText('Email'), 'e@test.com')
-    await fireEvent.update(getByPlaceholderText('Password'), 'pw')
-    const form = container.querySelector('form') as HTMLFormElement
-    await fireEvent.submit(form)
-    await flushPromises()
-    expect(login).toHaveBeenCalledWith('e@test.com', 'pw')
-    expect(syncItems).toHaveBeenCalled()
-    expect(syncCustomers).toHaveBeenCalled()
-    expect(push).toHaveBeenCalledWith('/home')
-  })
 
   it('handles login errors', async () => {
-    login.mockRejectedValue(new Error('fail'))
-    const { getByPlaceholderText, container } = render(LoginView, {
-      global: { stubs },
+      login.mockRejectedValue(new Error('fail'))
+      const { getByPlaceholderText, container } = render(LoginView, {
+        global: { stubs },
+      })
+      await fireEvent.update(getByPlaceholderText('Email'), 'e@test.com')
+      await fireEvent.update(getByPlaceholderText('Password'), 'pw')
+      const form = container.querySelector('form') as HTMLFormElement
+      await fireEvent.submit(form)
+      await flushPromises()
+      expect(push).not.toHaveBeenCalled()
+      expect(handleError).toHaveBeenCalled()
     })
-    await fireEvent.update(getByPlaceholderText('Email'), 'e@test.com')
-    await fireEvent.update(getByPlaceholderText('Password'), 'pw')
-    const form = container.querySelector('form') as HTMLFormElement
-    await fireEvent.submit(form)
-    await flushPromises()
-    expect(syncItems).not.toHaveBeenCalled()
-    expect(push).not.toHaveBeenCalled()
-    expect(handleError).toHaveBeenCalled()
-  })
 
   it('shows validation errors', async () => {
     const { container, getByText } = render(LoginView, { global: { stubs } })
@@ -92,26 +83,24 @@ describe('LoginView', () => {
   })
 
   it('disables button and shows loading during login', async () => {
-    let resolveLogin: () => void = () => {}
-    login.mockImplementation(
-      () =>
-        new Promise((res) => {
-          resolveLogin = () => res(undefined)
-        })
-    )
-    syncItems.mockResolvedValue(undefined)
-    syncCustomers.mockResolvedValue(undefined)
-    const { getByPlaceholderText, getByText, queryByTestId } = render(LoginView, {
-      global: { stubs },
+      let resolveLogin: () => void = () => {}
+      login.mockImplementation(
+        () =>
+          new Promise((res) => {
+            resolveLogin = () => res(undefined)
+          })
+      )
+      const { getByPlaceholderText, getByText, queryByTestId } = render(LoginView, {
+        global: { stubs },
+      })
+      await fireEvent.update(getByPlaceholderText('Email'), 'e@test.com')
+      await fireEvent.update(getByPlaceholderText('Password'), 'pw')
+      const button = getByText('Login') as HTMLButtonElement
+      await fireEvent.click(button)
+      expect(button.disabled).toBe(true)
+      expect(queryByTestId('loading')).toBeTruthy()
+      resolveLogin()
+      await flushPromises()
+      expect(button.disabled).toBe(false)
     })
-    await fireEvent.update(getByPlaceholderText('Email'), 'e@test.com')
-    await fireEvent.update(getByPlaceholderText('Password'), 'pw')
-    const button = getByText('Login') as HTMLButtonElement
-    await fireEvent.click(button)
-    expect(button.disabled).toBe(true)
-    expect(queryByTestId('loading')).toBeTruthy()
-    resolveLogin()
-    await flushPromises()
-    expect(button.disabled).toBe(false)
-  })
 })
