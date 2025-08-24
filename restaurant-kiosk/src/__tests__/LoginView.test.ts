@@ -32,8 +32,13 @@ describe('LoginView', () => {
     },
     IonButton: {
       name: 'IonButton',
-      props: ['type'],
-      template: '<button :type="type"><slot/></button>',
+      props: ['type', 'disabled'],
+      template: '<button :type="type" :disabled="disabled"><slot/></button>',
+    },
+    IonLoading: {
+      name: 'IonLoading',
+      props: ['isOpen', 'message'],
+      template: '<div v-if="isOpen" data-testid="loading">{{ message }}</div>',
     },
   }
 
@@ -76,5 +81,37 @@ describe('LoginView', () => {
     expect(syncItems).not.toHaveBeenCalled()
     expect(push).not.toHaveBeenCalled()
     expect(handleError).toHaveBeenCalled()
+  })
+
+  it('shows validation errors', async () => {
+    const { container, getByText } = render(LoginView, { global: { stubs } })
+    const form = container.querySelector('form') as HTMLFormElement
+    await fireEvent.submit(form)
+    getByText('Valid email required')
+    getByText('Password is required')
+  })
+
+  it('disables button and shows loading during login', async () => {
+    let resolveLogin: () => void = () => {}
+    login.mockImplementation(
+      () =>
+        new Promise((res) => {
+          resolveLogin = () => res(undefined)
+        })
+    )
+    syncItems.mockResolvedValue(undefined)
+    syncCustomers.mockResolvedValue(undefined)
+    const { getByPlaceholderText, getByText, queryByTestId } = render(LoginView, {
+      global: { stubs },
+    })
+    await fireEvent.update(getByPlaceholderText('Email'), 'e@test.com')
+    await fireEvent.update(getByPlaceholderText('Password'), 'pw')
+    const button = getByText('Login') as HTMLButtonElement
+    await fireEvent.click(button)
+    expect(button.disabled).toBe(true)
+    expect(queryByTestId('loading')).toBeTruthy()
+    resolveLogin()
+    await flushPromises()
+    expect(button.disabled).toBe(false)
   })
 })

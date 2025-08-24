@@ -16,6 +16,7 @@ import {
 } from '../lib/db'
 import { getBaseURL } from '../lib/api'
 import { handleError } from '../lib/errorHandler'
+import { toastController, loadingController } from '@ionic/vue'
 
 interface CartItem {
   item: Item
@@ -36,6 +37,11 @@ export const useMainStore = defineStore(
     const phone = ref('')
     const isOnline = ref(window.navigator.onLine)
 
+    async function showToast(message: string, color: 'success' | 'danger' = 'success') {
+      const toast = await toastController.create({ message, duration: 2000, color })
+      await toast.present()
+    }
+
     async function syncOrders() {
       if (!isOnline.value || !baseURL.value || !token.value) return
       const unsynced = await getUnsyncedOrders()
@@ -48,6 +54,9 @@ export const useMainStore = defineStore(
         } catch (err) {
           handleError(err)
         }
+      }
+      if (unsynced.length) {
+        await showToast('Orders synced')
       }
     }
 
@@ -77,6 +86,8 @@ export const useMainStore = defineStore(
 
     async function syncItems() {
       if (!baseURL.value || !token.value) return
+      const loading = await loadingController.create({ message: 'Syncing items...' })
+      await loading.present()
       try {
         const { data } = await axios.get(`${baseURL.value}/items`, {
           headers: { Authorization: `Bearer ${token.value}` },
@@ -84,14 +95,19 @@ export const useMainStore = defineStore(
         const fetched: Item[] = data?.items || data || []
         items.value = fetched
         await bulkInsertItems(fetched)
+        await showToast('Items synced')
       } catch (err) {
         handleError(err)
         items.value = await getItemsList()
+      } finally {
+        await loading.dismiss()
       }
     }
 
     async function syncCustomers() {
       if (!baseURL.value || !token.value) return
+      const loading = await loadingController.create({ message: 'Syncing customers...' })
+      await loading.present()
       try {
         const { data } = await axios.get(`${baseURL.value}/customers`, {
           headers: { Authorization: `Bearer ${token.value}` },
@@ -99,9 +115,12 @@ export const useMainStore = defineStore(
         const fetched: Customer[] = data?.customers || data || []
         customers.value = fetched
         await bulkInsertCustomers(fetched)
+        await showToast('Customers synced')
       } catch (err) {
         handleError(err)
         customers.value = await getCustomersList()
+      } finally {
+        await loading.dismiss()
       }
     }
 
@@ -112,6 +131,7 @@ export const useMainStore = defineStore(
       } else {
         cart.value.push({ item, quantity: 1 })
       }
+      void showToast('Item added to cart')
     }
 
     function removeFromCart(itemId: string) {
