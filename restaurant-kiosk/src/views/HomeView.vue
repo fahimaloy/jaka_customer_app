@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { IonPage, IonContent } from '@ionic/vue'
+import { IonPage, IonContent, IonButton } from '@ionic/vue'
 import CategoryList from '../components/CategoryList.vue'
 import ItemGrid from '../components/ItemGrid.vue'
 import { useMainStore } from '../store/mainStore'
 import type { Item } from '../lib/db'
+import { useRouter } from 'vue-router'
 
 type ItemWithImage = Item & { image_link?: string; category_id?: string; category?: string }
 interface Category { id: string; name: string }
 
 const store = useMainStore()
 const selected = ref<string | null>(null)
+const router = useRouter()
 
 const categories = computed(() => (store.categories as Category[]) || [])
 const items = computed<ItemWithImage[]>(() => {
@@ -27,11 +29,18 @@ function handleSelect(id: string | null) {
 function handleAdd(item: ItemWithImage) {
   store.addToCart(item)
 }
+
+function goManualSync() {
+  router.push('/manual-sync')
+}
 </script>
 
 <template>
   <IonPage>
     <IonContent>
+      <div class="p-4">
+        <IonButton @click="goManualSync">Manual Sync</IonButton>
+      </div>
       <CategoryList
         :categories="categories"
         :selected="selected"
