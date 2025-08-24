@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">restaurant-kiosk</string>
+    <string name="title_activity_main">restaurant-kiosk</string>
+    <string name="package_name">com.jaka.kiosk</string>
+    <string name="custom_url_scheme">com.jaka.kiosk</string>
+</resources>
