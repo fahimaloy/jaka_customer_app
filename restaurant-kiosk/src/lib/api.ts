@@ -1,5 +1,5 @@
-import axios from 'axios'
 import { useMainStore } from '../store/mainStore'
+import http from './http'
 
 interface Credentials {
   email: string
@@ -7,7 +7,7 @@ interface Credentials {
 }
 
 export async function getBaseURL({ email, password }: Credentials): Promise<string> {
-  const { data } = await axios.post('https://app.jakac.com/api/domains', {
+  const { data } = await http.post('https://app.jakac.com/api/domains', {
     email,
     password,
   })
@@ -22,7 +22,7 @@ export async function login({ email, password }: Credentials): Promise<{
   settings: unknown
 }> {
   const baseURL = await getBaseURL({ email, password })
-  const { data } = await axios.post(`${baseURL}/store-login`, {
+  const { data } = await http.post(`${baseURL}/store-login`, {
     email,
     password,
   })

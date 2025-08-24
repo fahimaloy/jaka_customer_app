@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
+import http from '../lib/http'
 import {
   bulkInsertItems,
   bulkInsertCustomers,
@@ -47,7 +47,7 @@ export const useMainStore = defineStore(
       const unsynced = await getUnsyncedOrders()
       for (const o of unsynced) {
         try {
-          await axios.post(`${baseURL.value}/place-order`, o, {
+          await http.post(`${baseURL.value}/place-order`, o, {
             headers: { Authorization: `Bearer ${token.value}` },
           })
           await markOrderSynced(o.id)
@@ -74,7 +74,7 @@ export const useMainStore = defineStore(
 
     async function login(email: string, password: string) {
       const url = await getBaseURL({ email, password })
-      const { data } = await axios.post(`${url}/store-login`, {
+      const { data } = await http.post(`${url}/store-login`, {
         email,
         password,
       })
@@ -89,7 +89,7 @@ export const useMainStore = defineStore(
       const loading = await loadingController.create({ message: 'Syncing items...' })
       await loading.present()
       try {
-        const { data } = await axios.get(`${baseURL.value}/items`, {
+        const { data } = await http.get(`${baseURL.value}/items`, {
           headers: { Authorization: `Bearer ${token.value}` },
         })
         const fetched: Item[] = data?.items || data || []
@@ -109,7 +109,7 @@ export const useMainStore = defineStore(
       const loading = await loadingController.create({ message: 'Syncing customers...' })
       await loading.present()
       try {
-        const { data } = await axios.get(`${baseURL.value}/customers`, {
+        const { data } = await http.get(`${baseURL.value}/customers`, {
           headers: { Authorization: `Bearer ${token.value}` },
         })
         const fetched: Customer[] = data?.customers || data || []
@@ -153,7 +153,7 @@ export const useMainStore = defineStore(
       }
       if (isOnline.value && baseURL.value && token.value) {
         try {
-          await axios.post(`${baseURL.value}/place-order`, order, {
+          await http.post(`${baseURL.value}/place-order`, order, {
             headers: { Authorization: `Bearer ${token.value}` },
           })
           await createOrder(order, 1)

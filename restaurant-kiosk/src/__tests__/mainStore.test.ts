@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 
-vi.mock('axios', () => ({
+vi.mock('../lib/http', () => ({
   default: {
     post: vi.fn(),
     get: vi.fn(),
@@ -33,13 +33,13 @@ vi.mock('@ionic/vue', () => ({
   },
 }))
 
-import axios from 'axios'
+import http from '../lib/http'
 import * as api from '../lib/api'
 import * as db from '../lib/db'
 import { handleError } from '../lib/errorHandler'
 import { useMainStore } from '../store/mainStore'
 
-const mockedAxios = axios as unknown as {
+const mockedHttp = http as unknown as {
   post: ReturnType<typeof vi.fn>
   get: ReturnType<typeof vi.fn>
 }
@@ -55,7 +55,7 @@ describe('mainStore', () => {
 
   it('login sets auth data', async () => {
     mockedApi.getBaseURL.mockResolvedValue('http://base')
-    mockedAxios.post.mockResolvedValue({
+    mockedHttp.post.mockResolvedValue({
       data: { token: 't', locations: [1], settings: { s: true } },
     })
     const store = useMainStore()
@@ -68,13 +68,13 @@ describe('mainStore', () => {
 
   it('login propagates errors', async () => {
     mockedApi.getBaseURL.mockResolvedValue('http://base')
-    mockedAxios.post.mockRejectedValue(new Error('fail'))
+    mockedHttp.post.mockRejectedValue(new Error('fail'))
     const store = useMainStore()
     await expect(store.login('e', 'p')).rejects.toThrow('fail')
   })
 
   it('syncItems fetches and saves items', async () => {
-    mockedAxios.get.mockResolvedValue({
+    mockedHttp.get.mockResolvedValue({
       data: { items: [{ id: '1', name: 'i', price: 1 }] },
     })
     const store = useMainStore()
@@ -88,7 +88,7 @@ describe('mainStore', () => {
   })
 
   it('syncItems falls back to local cache on error', async () => {
-    mockedAxios.get.mockRejectedValue(new Error('fail'))
+    mockedHttp.get.mockRejectedValue(new Error('fail'))
     mockedDb.getItemsList.mockResolvedValue([
       { id: '2', name: 'cached', price: 2 },
     ])
@@ -100,7 +100,7 @@ describe('mainStore', () => {
   })
 
   it('syncCustomers fetches and saves customers', async () => {
-    mockedAxios.get.mockResolvedValue({
+    mockedHttp.get.mockResolvedValue({
       data: { customers: [{ id: '1', name: 'c' }] },
     })
     const store = useMainStore()
@@ -114,7 +114,7 @@ describe('mainStore', () => {
   })
 
   it('syncCustomers falls back to cache on error', async () => {
-    mockedAxios.get.mockRejectedValue(new Error('fail'))
+    mockedHttp.get.mockRejectedValue(new Error('fail'))
     mockedDb.getCustomersList.mockResolvedValue([
       { id: '2', name: 'cached' },
     ])
@@ -127,7 +127,7 @@ describe('mainStore', () => {
 
   it('syncOrders reports errors via handleError', async () => {
     mockedDb.getUnsyncedOrders.mockResolvedValue([{ id: '1' }])
-    mockedAxios.post.mockRejectedValue(new Error('fail'))
+    mockedHttp.post.mockRejectedValue(new Error('fail'))
     const store = useMainStore()
     store.baseURL = 'http://base'
     store.token = 't'
@@ -137,7 +137,7 @@ describe('mainStore', () => {
   })
 
   it('placeOrder sends order when online', async () => {
-    mockedAxios.post.mockResolvedValue({})
+    mockedHttp.post.mockResolvedValue({})
     const store = useMainStore()
     store.baseURL = 'http://base'
     store.token = 't'
@@ -153,7 +153,7 @@ describe('mainStore', () => {
   })
 
   it('placeOrder queues order when offline or failed', async () => {
-    mockedAxios.post.mockRejectedValue(new Error('fail'))
+    mockedHttp.post.mockRejectedValue(new Error('fail'))
     const store = useMainStore()
     store.baseURL = 'http://base'
     store.token = 't'
