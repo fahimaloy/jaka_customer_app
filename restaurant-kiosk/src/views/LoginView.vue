@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { IonPage, IonContent, IonInput, IonButton } from '@ionic/vue'
 import { useRouter } from 'vue-router'
 import { useMainStore } from '../store/mainStore'
+import { handleError } from '../lib/errorHandler'
 
 const email = ref('')
 const password = ref('')
@@ -16,7 +17,7 @@ async function onLogin() {
     await store.syncCustomers()
     router.push('/home')
   } catch (err) {
-    console.error(err)
+    handleError(err)
   }
 }
 </script>

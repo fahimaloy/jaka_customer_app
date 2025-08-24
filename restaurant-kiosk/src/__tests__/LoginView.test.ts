@@ -15,6 +15,9 @@ vi.mock('../store/mainStore', () => ({
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push }),
 }))
+vi.mock('../lib/errorHandler', () => ({ handleError: vi.fn() }))
+
+import { handleError } from '../lib/errorHandler'
 
 describe('LoginView', () => {
   const stubs = {
@@ -39,6 +42,7 @@ describe('LoginView', () => {
     syncItems.mockReset()
     syncCustomers.mockReset()
     push.mockReset()
+    handleError.mockReset()
   })
 
   it('logs in and navigates on success', async () => {
@@ -71,5 +75,6 @@ describe('LoginView', () => {
     await flushPromises()
     expect(syncItems).not.toHaveBeenCalled()
     expect(push).not.toHaveBeenCalled()
+    expect(handleError).toHaveBeenCalled()
   })
 })

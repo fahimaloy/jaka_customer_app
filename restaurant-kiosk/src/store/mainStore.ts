@@ -15,6 +15,7 @@ import {
   type Order,
 } from '../lib/db'
 import { getBaseURL } from '../lib/api'
+import { handleError } from '../lib/errorHandler'
 
 interface CartItem {
   item: Item
@@ -44,7 +45,9 @@ export const useMainStore = defineStore(
             headers: { Authorization: `Bearer ${token.value}` },
           })
           await markOrderSynced(o.id)
-        } catch {}
+        } catch (err) {
+          handleError(err)
+        }
       }
     }
 
@@ -81,7 +84,8 @@ export const useMainStore = defineStore(
         const fetched: Item[] = data?.items || data || []
         items.value = fetched
         await bulkInsertItems(fetched)
-      } catch {
+      } catch (err) {
+        handleError(err)
         items.value = await getItemsList()
       }
     }
@@ -95,7 +99,8 @@ export const useMainStore = defineStore(
         const fetched: Customer[] = data?.customers || data || []
         customers.value = fetched
         await bulkInsertCustomers(fetched)
-      } catch {
+      } catch (err) {
+        handleError(err)
         customers.value = await getCustomersList()
       }
     }
@@ -132,7 +137,8 @@ export const useMainStore = defineStore(
             headers: { Authorization: `Bearer ${token.value}` },
           })
           await createOrder(order, 1)
-        } catch {
+        } catch (err) {
+          handleError(err)
           await createOrder(order, 0)
         }
       } else {
