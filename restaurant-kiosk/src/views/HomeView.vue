@@ -36,10 +36,15 @@ function goManualSync() {
 </script>
 
 <template>
-  <IonPage>
-    <IonContent>
-      <div class="p-4">
-        <IonButton @click="goManualSync">Manual Sync</IonButton>
+  <IonPage class="kiosk-theme">
+    <IonContent class="p-4 space-y-6">
+      <div class="flex justify-end">
+        <IonButton
+          class="btn-lg text-xl bg-blue-600 text-white"
+          @click="goManualSync"
+        >
+          Manual Sync
+        </IonButton>
       </div>
       <CategoryList
         :categories="categories"
