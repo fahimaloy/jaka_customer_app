@@ -22,9 +22,14 @@ vi.mock('../lib/db', () => ({
   getItemsList: vi.fn(),
 }))
 
+vi.mock('../lib/errorHandler', () => ({
+  handleError: vi.fn(),
+}))
+
 import axios from 'axios'
 import * as api from '../lib/api'
 import * as db from '../lib/db'
+import { handleError } from '../lib/errorHandler'
 import { useMainStore } from '../store/mainStore'
 
 const mockedAxios = axios as unknown as {
@@ -33,6 +38,7 @@ const mockedAxios = axios as unknown as {
 }
 const mockedApi = api as unknown as { getBaseURL: ReturnType<typeof vi.fn> }
 const mockedDb = db as unknown as Record<string, ReturnType<typeof vi.fn>>
+const mockedHandleError = handleError as unknown as ReturnType<typeof vi.fn>
 
 describe('mainStore', () => {
   beforeEach(() => {
@@ -112,6 +118,17 @@ describe('mainStore', () => {
     expect(store.customers).toEqual([{ id: '2', name: 'cached' }])
   })
 
+  it('syncOrders reports errors via handleError', async () => {
+    mockedDb.getUnsyncedOrders.mockResolvedValue([{ id: '1' }])
+    mockedAxios.post.mockRejectedValue(new Error('fail'))
+    const store = useMainStore()
+    store.baseURL = 'http://base'
+    store.token = 't'
+    store.isOnline = true
+    await store.syncOrders()
+    expect(mockedHandleError).toHaveBeenCalled()
+  })
+
   it('placeOrder sends order when online', async () => {
     mockedAxios.post.mockResolvedValue({})
     const store = useMainStore()
@@ -142,6 +159,7 @@ describe('mainStore', () => {
       0,
     )
     expect(store.cart.length).toBe(0)
+    expect(mockedHandleError).toHaveBeenCalled()
   })
 
   it('addToCart and removeFromCart work', () => {
