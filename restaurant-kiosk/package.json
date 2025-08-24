@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^7.0.1",
     "@capacitor/core": "^7.4.3",
     "@ionic/vue": "^8.7.3",
     "@ionic/vue-router": "^8.7.3",
