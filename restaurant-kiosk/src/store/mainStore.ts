@@ -5,6 +5,8 @@ import {
   bulkInsertItems,
   bulkInsertCustomers,
   createOrder,
+  getUnsyncedOrders,
+  markOrderSynced,
   getCustomersList,
   getItemsList,
   type Item,
@@ -31,6 +33,32 @@ export const useMainStore = defineStore(
     const customers = ref<Customer[]>([])
     const cart = ref<CartItem[]>([])
     const phone = ref('')
+    const isOnline = ref(window.navigator.onLine)
+
+    async function syncOrders() {
+      if (!isOnline.value || !baseURL.value || !token.value) return
+      const unsynced = await getUnsyncedOrders()
+      for (const o of unsynced) {
+        try {
+          await axios.post(`${baseURL.value}/place-order`, o, {
+            headers: { Authorization: `Bearer ${token.value}` },
+          })
+          await markOrderSynced(o.id)
+        } catch {}
+      }
+    }
+
+    window.addEventListener('online', () => {
+      isOnline.value = true
+      syncOrders()
+    })
+    window.addEventListener('offline', () => {
+      isOnline.value = false
+    })
+
+    if (isOnline.value) {
+      syncOrders()
+    }
 
     async function login(email: string, password: string) {
       const url = await getBaseURL({ email, password })
@@ -98,16 +126,19 @@ export const useMainStore = defineStore(
         customerId,
         items: orderItems,
       }
-      try {
-        if (baseURL.value && token.value) {
-          await axios.post(`${baseURL.value}/orders`, order, {
+      if (isOnline.value && baseURL.value && token.value) {
+        try {
+          await axios.post(`${baseURL.value}/place-order`, order, {
             headers: { Authorization: `Bearer ${token.value}` },
           })
+          await createOrder(order, 1)
+        } catch {
+          await createOrder(order, 0)
         }
-      } finally {
-        await createOrder(order)
-        clearCart()
+      } else {
+        await createOrder(order, 0)
       }
+      clearCart()
     }
 
     function clearCart() {
@@ -131,6 +162,8 @@ export const useMainStore = defineStore(
       removeFromCart,
       placeOrder,
       clearCart,
+      isOnline,
+      syncOrders,
     }
   },
   { persist: true }
