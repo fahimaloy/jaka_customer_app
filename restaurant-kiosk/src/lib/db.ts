@@ -17,6 +17,7 @@ const tableSchemas: Record<string, string> = {
     id TEXT PRIMARY KEY,
     customer_id TEXT,
     items TEXT,
+    is_synced INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
   );`,
   barcodes: `CREATE TABLE IF NOT EXISTS barcodes (
@@ -76,10 +77,24 @@ export const bulkInsertCustomers = async (customers: Customer[]): Promise<void> 
   }
 };
 
-export const createOrder = async (order: Order): Promise<void> => {
-  const stmt = `INSERT INTO orders (id, customer_id, items) VALUES (?, ?, ?)`;
+export const createOrder = async (order: Order, isSynced = 1): Promise<void> => {
+  const stmt = `INSERT INTO orders (id, customer_id, items, is_synced) VALUES (?, ?, ?, ?)`;
   const itemsJson = JSON.stringify(order.items);
-  await db.run(stmt, [order.id, order.customerId, itemsJson]);
+  await db.run(stmt, [order.id, order.customerId, itemsJson, isSynced]);
+};
+
+export const getUnsyncedOrders = async (): Promise<Order[]> => {
+  const result = await db.query(`SELECT id, customer_id, items FROM orders WHERE is_synced = 0`);
+  const rows = result.values ?? [];
+  return rows.map((r: any) => ({
+    id: r.id,
+    customerId: r.customer_id,
+    items: JSON.parse(r.items) as OrderItem[],
+  }));
+};
+
+export const markOrderSynced = async (id: string): Promise<void> => {
+  await db.run(`UPDATE orders SET is_synced = 1 WHERE id = ?`, [id]);
 };
 
 export const getCustomersList = async (): Promise<Customer[]> => {
