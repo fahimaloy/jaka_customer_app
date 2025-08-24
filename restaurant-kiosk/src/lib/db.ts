@@ -86,3 +86,8 @@ export const getCustomersList = async (): Promise<Customer[]> => {
   const result = await db.query(`SELECT id, name FROM customers`);
   return result.values as Customer[] ?? [];
 };
+
+export const getItemsList = async (): Promise<Item[]> => {
+  const result = await db.query(`SELECT id, name, price FROM items`);
+  return result.values as Item[] ?? [];
+};
