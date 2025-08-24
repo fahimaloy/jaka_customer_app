@@ -17,6 +17,8 @@ import {
 import { getBaseURL } from '../lib/api'
 import { handleError } from '../lib/errorHandler'
 import { toastController, loadingController } from '@ionic/vue'
+import { CapacitorSQLite } from '@capacitor-community/sqlite'
+import router from '../router'
 
 interface CartItem {
   item: Item
@@ -188,6 +190,45 @@ export const useMainStore = defineStore(
       cart.value = []
     }
 
+    async function factoryReset() {
+      try {
+        await CapacitorSQLite.deleteDatabase({ database: 'app_db', version: 1 })
+      } catch {}
+
+      try {
+        localStorage.clear()
+      } catch {}
+
+      try {
+        // indexedDB.databases is not available in all browsers
+        const anyIndexed = indexedDB as any
+        if (anyIndexed && typeof anyIndexed.databases === 'function') {
+          const dbs = await anyIndexed.databases()
+          for (const db of dbs) {
+            await new Promise<void>((resolve) => {
+              const req = indexedDB.deleteDatabase(db.name)
+              req.onsuccess = () => resolve()
+              req.onerror = () => resolve()
+              req.onblocked = () => resolve()
+            })
+          }
+        }
+      } catch {}
+
+      token.value = null
+      baseURL.value = ''
+      locations.value = []
+      settings.value = null
+      categories.value = []
+      items.value = []
+      customers.value = []
+      cart.value = []
+      phone.value = ''
+      isOnline.value = window.navigator.onLine
+
+      await router.push('/login')
+    }
+
     return {
       token,
       baseURL,
@@ -208,6 +249,7 @@ export const useMainStore = defineStore(
       clearCart,
       isOnline,
       syncOrders,
+      factoryReset,
     }
   },
   { persist: true }
