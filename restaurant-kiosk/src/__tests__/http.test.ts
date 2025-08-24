@@ -12,15 +12,16 @@ const mockedModal = {
 }
 
 describe('http interceptor', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-    vi.clearAllMocks()
-    vi.spyOn(modalController, 'create').mockResolvedValue(mockedModal as any)
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { href: 'http://localhost/' },
+    beforeEach(() => {
+      setActivePinia(createPinia())
+      vi.clearAllMocks()
+      vi.spyOn(modalController, 'create').mockResolvedValue(mockedModal as any)
+      localStorage.clear()
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        value: { href: 'http://localhost/' },
+      })
     })
-  })
 
   it('resets store and redirects on 401', async () => {
     const store = useMainStore()

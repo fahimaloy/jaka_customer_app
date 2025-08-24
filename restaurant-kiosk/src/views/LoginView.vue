@@ -23,10 +23,8 @@ async function onLogin() {
   if (errors.value.email || errors.value.password) return
   loading.value = true
   try {
-    await store.login(email.value, password.value)
-    await store.syncItems()
-    await store.syncCustomers()
-    router.push('/home')
+      await store.login(email.value, password.value)
+      router.push('/sync')
   } catch (err) {
     handleError(err)
   } finally {
