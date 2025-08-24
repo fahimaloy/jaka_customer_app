@@ -16,13 +16,17 @@ function handleAdd(item: ItemWithImage) {
 
 <template>
   <IonGrid>
-    <IonRow>
+    <IonRow role="list">
       <IonCol
         v-for="item in props.items"
         :key="item.id"
-        size="6"
+        size="12"
+        size-sm="6"
         size-md="4"
         size-lg="3"
+        role="listitem"
+        :aria-label="item.name"
+        class="p-2"
       >
         <ItemCard :item="item" @add="handleAdd" />
       </IonCol>

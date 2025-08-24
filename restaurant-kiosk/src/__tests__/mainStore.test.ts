@@ -26,6 +26,13 @@ vi.mock('../lib/errorHandler', () => ({
   handleError: vi.fn(),
 }))
 
+vi.mock('@ionic/vue', () => ({
+  toastController: { create: vi.fn().mockResolvedValue({ present: vi.fn() }) },
+  loadingController: {
+    create: vi.fn().mockResolvedValue({ present: vi.fn(), dismiss: vi.fn() }),
+  },
+}))
+
 import axios from 'axios'
 import * as api from '../lib/api'
 import * as db from '../lib/db'
