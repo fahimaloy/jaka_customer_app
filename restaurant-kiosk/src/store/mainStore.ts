@@ -91,10 +91,17 @@ export const useMainStore = defineStore(
       const loading = await loadingController.create({ message: 'Syncing items...' })
       await loading.present()
       try {
-        const { data } = await http.get(`${baseURL.value}/items`, {
-          headers: { Authorization: `Bearer ${token.value}` },
-        })
-        const fetched: Item[] = data?.items || data || []
+        const fetched: Item[] = []
+        let next: string | null = null
+        do {
+          const url = new URL(`${baseURL.value}/items`)
+          if (next) url.searchParams.set('page_token', next)
+          const { data } = await http.get(url.toString(), {
+            headers: { Authorization: `Bearer ${token.value}` },
+          })
+          fetched.push(...(data?.items || data || []))
+          next = data?.next ?? null
+        } while (next)
         items.value = fetched
         await bulkInsertItems(fetched)
         await showToast('Items synced')
@@ -111,10 +118,17 @@ export const useMainStore = defineStore(
       const loading = await loadingController.create({ message: 'Syncing customers...' })
       await loading.present()
       try {
-        const { data } = await http.get(`${baseURL.value}/customers`, {
-          headers: { Authorization: `Bearer ${token.value}` },
-        })
-        const fetched: Customer[] = data?.customers || data || []
+        const fetched: Customer[] = []
+        let next: string | null = null
+        do {
+          const url = new URL(`${baseURL.value}/customers`)
+          if (next) url.searchParams.set('page_token', next)
+          const { data } = await http.get(url.toString(), {
+            headers: { Authorization: `Bearer ${token.value}` },
+          })
+          fetched.push(...(data?.customers || data || []))
+          next = data?.next ?? null
+        } while (next)
         customers.value = fetched
         await bulkInsertCustomers(fetched)
         await showToast('Customers synced')
@@ -153,11 +167,45 @@ export const useMainStore = defineStore(
       void showToast('Item added to cart')
     }
 
-    function removeFromCart(itemId: string) {
+    function updateItemQuantity(itemId: string, quantity: number) {
+      const existing = cart.value.find((c) => c.item.id === itemId)
+      if (!existing) return
+      existing.quantity = quantity
+      if (existing.quantity <= 0) {
+        removeItem(itemId)
+      }
+    }
+
+    function editItem(itemId: string, updated: Item) {
+      const existing = cart.value.find((c) => c.item.id === itemId)
+      if (existing) {
+        existing.item = updated
+      }
+    }
+
+    function removeItem(itemId: string) {
       const idx = cart.value.findIndex((c) => c.item.id === itemId)
       if (idx !== -1) {
         cart.value.splice(idx, 1)
       }
+    }
+
+    // Backwards compatibility
+    function removeFromCart(itemId: string) {
+      removeItem(itemId)
+    }
+
+    function filterItems(category: string | null) {
+      if (!category) return items.value
+      return items.value.filter(
+        (i) => i.category_id === category || (i as any).category === category
+      )
+    }
+
+    function searchItems(query: string) {
+      const q = query.trim().toLowerCase()
+      if (!q) return items.value
+      return items.value.filter((i) => i.name.toLowerCase().includes(q))
     }
 
     async function placeOrder(customerId: string) {
@@ -240,11 +288,16 @@ export const useMainStore = defineStore(
       cart,
       phone,
       login,
-        syncItems,
-        syncCustomers,
-        syncSettings,
-        addToCart,
+      syncItems,
+      syncCustomers,
+      syncSettings,
+      addToCart,
+      updateItemQuantity,
+      editItem,
+      removeItem,
       removeFromCart,
+      filterItems,
+      searchItems,
       placeOrder,
       clearCart,
       isOnline,
