@@ -18,20 +18,24 @@ function onChange(ev: CustomEvent) {
     :value="props.selected || ''"
     @ionChange="onChange"
     scrollable
-    class="px-2 py-4"
+    class="px-4 py-6 flex gap-4"
     aria-label="Categories"
   >
-    <IonSegmentButton value="" class="min-h-14 px-4" aria-label="All categories">
-      <IonLabel class="text-base">All</IonLabel>
+    <IonSegmentButton
+      value=""
+      class="btn-lg bg-red-500 text-white"
+      aria-label="All categories"
+    >
+      <IonLabel class="text-xl font-semibold">All</IonLabel>
     </IonSegmentButton>
     <IonSegmentButton
       v-for="cat in props.categories"
       :key="cat.id"
       :value="cat.id"
-      class="min-h-14 px-4"
+      class="btn-lg bg-red-500 text-white"
       :aria-label="cat.name"
     >
-      <IonLabel class="text-base">{{ cat.name }}</IonLabel>
+      <IonLabel class="text-xl font-semibold">{{ cat.name }}</IonLabel>
     </IonSegmentButton>
   </IonSegment>
 </template>

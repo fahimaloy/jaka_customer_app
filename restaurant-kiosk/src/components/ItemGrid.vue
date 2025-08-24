@@ -15,8 +15,8 @@ function handleAdd(item: ItemWithImage) {
 </script>
 
 <template>
-  <IonGrid>
-    <IonRow role="list">
+  <IonGrid class="p-4">
+    <IonRow role="list" class="gap-4">
       <IonCol
         v-for="item in props.items"
         :key="item.id"
@@ -26,7 +26,7 @@ function handleAdd(item: ItemWithImage) {
         size-lg="3"
         role="listitem"
         :aria-label="item.name"
-        class="p-2"
+        class="p-4"
       >
         <ItemCard :item="item" @add="handleAdd" />
       </IonCol>
