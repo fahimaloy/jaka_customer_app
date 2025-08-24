@@ -33,6 +33,10 @@ vi.mock('@ionic/vue', () => ({
   },
 }))
 
+vi.mock('@capacitor-community/sqlite', () => ({
+  CapacitorSQLite: { deleteDatabase: vi.fn() },
+}))
+
 import http from '../lib/http'
 import * as api from '../lib/api'
 import * as db from '../lib/db'
