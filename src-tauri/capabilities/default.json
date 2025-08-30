@@ -1,0 +1,122 @@
+{
+  "$schema": "../gen/schemas/android-schema.json",
+  "identifier": "main",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "process:allow-restart",
+    "core:default",
+    "opener:default",
+    "sql:default",
+    "sql:allow-load",
+    "sql:allow-execute",
+    "sql:allow-select",
+    "sql:allow-close",
+    {
+      "identifier": "fs:allow-download-write",
+      "allow": [
+        {
+          "path": "$DOWNLOAD"
+        },
+        {
+          "path": "$APPCONFIG"
+        },
+        {
+          "path": "$HOME"
+        },
+        {
+          "path": "$HOME/JakaInvoices"
+        },
+        {
+          "path": "$DOCUMENT"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-download-write-recursive",
+      "allow": [
+        {
+          "path": "$HOME/**"
+        },
+        {
+          "path": "$DOWNLOAD/**"
+        },
+        {
+          "path": "$DOCUMENT/**"
+        },
+        {
+          "path": "$APPCONFIG/**"
+        }
+      ]
+    },
+    "dialog:default",
+    "dialog:allow-save",
+    {
+      "identifier": "fs:allow-write",
+      "allow": [
+        {
+          "path": "$HOME"
+        },
+        {
+          "path": "$HOME/*"
+        },
+        {
+          "path": "$DOWNLOAD"
+        },
+        {
+          "path": "$DOWNLOAD/*"
+        },
+        {
+          "path": "$DOCUMENT"
+        },
+        {
+          "path": "$DOCUMENT/*"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "$APPDATA/databases/*"
+        },
+        {
+          "path": "$DOWNLOAD"
+        },
+        {
+          "path": "$DOCUMENT"
+        },
+        {
+          "path": "$HOME"
+        },
+        {
+          "path": "$HOME/*"
+        }
+      ]
+    },
+    "fs:allow-read",
+    "fs:allow-open",
+    "fs:write-all",
+    "fs:read-all",
+    "process:default",
+    "blec:default",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$HOME/Download/**" },
+        { "path": "$HOME/Downloads/**" }
+      ]
+    },
+    {
+      "identifier": "opener:allow-reveal-item-in-dir",
+      "allow": [
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$HOME/Download/**" },
+        { "path": "$HOME/Downloads/**" }
+      ]
+    },
+    "opener:allow-open-url",
+    "share:default"
+  ]
+}

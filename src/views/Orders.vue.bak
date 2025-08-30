@@ -1,0 +1,226 @@
+<template>
+  <div
+    v-if="!show_order_details"
+    class="flex flex-col items-center gap-2 w-full h-[90vh] overflow-y-scroll pb-32"
+  >
+    <div
+      v-for="order in order_list"
+      @click="openOrder(order)"
+      :key="order?.ptid"
+      :class="
+        selected_order?.ptid == order?.ptid
+          ? 'border-primary border-l-8'
+          : 'border-slate-400 border-l-4'
+      "
+      class="flex border-l gap-2 flex-col p-3 rounded-md shadow w-full justify-between bg-white"
+    >
+      <div class="flex justify-between items-center flex-wrap">
+        <div class="text-wrap">
+          {{ order?.ptid }} | {{ order?.token_counter }} |
+          {{ order?.invoice_num }}
+        </div>
+        <div class="text-xs">25-11-2024</div>
+      </div>
+      <div class="flex justify-between items-center flex-wrap">
+        <div>SAR {{ order?.cartState?.totalPayableAmount }}</div>
+        <div
+          class="w-fit p-0.5 text-xs text-center px-1 text-white rounded-md"
+          :class="order?.is_synced == 1 ? 'bg-primary' : 'bg-red-600'"
+        >
+          {{ order?.is_synced == 1 ? "Synced" : "Not Synced" }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    v-else
+    class="flex px-2 flex-col h-full min-h-screen gap-2 overflow-hidden"
+  >
+    <h3 class="text-xl font-semibold text-center py-1">Order Details:</h3>
+    <div class="flex flex-col gap-2 bg-white p-4 shadow-lg rounded-lg">
+      <div class="flex text-xs items-center justify-between gap-y-3 flex-wrap">
+        <div class="flex items-center gap-1 flex-wrap text-wrap">
+          <div class="font-semibold">PTID:</div>
+          <div>{{ selected_order?.ptid }}</div>
+        </div>
+        <div class="flex items-center gap-1 flex-wrap text-wrap">
+          <div class="font-semibold">Token:</div>
+          <div>{{ selected_order?.token_counter }}</div>
+        </div>
+        <div class="flex items-center gap-1 flex-wrap text-wrap">
+          <div class="font-semibold">Invoice:</div>
+          <div>{{ selected_order?.invoice_num || "12345" }}</div>
+        </div>
+        <div class="flex items-center gap-1 flex-wrap text-wrap">
+          <div class="font-semibold">Unique ID:</div>
+          <div>{{ selected_order?.unique_id || "12345" }}</div>
+        </div>
+        <div class="flex items-center gap-1 flex-wrap text-wrap">
+          <div class="font-semibold">Date:</div>
+          <div>{{ new Date(selected_order?.time).toUTCString() }}</div>
+        </div>
+
+        <div
+          v-if="selected_order?.customer && selected_order?.customer?.name"
+          class="flex items-center gap-1 flex-wrap text-wrap"
+        >
+          <div class="font-semibold">Customer:</div>
+          <div>{{ selected_order?.customer?.name }}</div>
+        </div>
+        <div
+          v-if="selected_order?.customer && selected_order?.customer?.phone"
+          class="flex items-center gap-1 flex-wrap text-wrap"
+        >
+          <div class="font-semibold">Phone:</div>
+          <div>{{ selected_order?.customer?.phone }}</div>
+        </div>
+        <div
+          v-if="selected_order?.customer && selected_order?.customer?.address"
+          class="flex items-center gap-1 flex-wrap text-wrap"
+        >
+          <div class="font-semibold">Address:</div>
+          <div>{{ selected_order?.customer?.address }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1 overflow-y-scroll h-[50vh] pb-44">
+      <OrderItem
+        v-for="item in selected_order?.cartState?.orderitems"
+        :item="item"
+      />
+    </div>
+    <div
+      class="bg-primary-light text-white font-semibold h-[30vh] fixed bottom-14 border-b left-0 right-0 shadow-xl rounded-t-2xl p-7 flex flex-col"
+    >
+      <div class="h-full w-full grid grid-cols-5 justify-between">
+        <div class="flex flex-col text-center">
+          <div class="text-xs">Quantity</div>
+          <div class="text-xs">
+            {{ selected_order?.cartState?.orderitems?.length || 0 }}
+          </div>
+        </div>
+        <div class="flex flex-col text-center">
+          <div class="text-xs">Items</div>
+          <div class="text-xs">
+            {{
+              getDecimalNumber(
+                selected_order?.cartState?.orderitems?.reduce(
+                  (total, value) => total + parseFloat(value?.quantity),
+                  0
+                ) || 0,
+                settings?.pos_settings?.currency_decimals || 2
+              )
+            }}
+          </div>
+        </div>
+        <div class="flex flex-col text-center">
+          <div class="text-xs">Discount</div>
+          <div class="text-xs">
+            {{
+              getDecimalNumber(
+                selected_order?.cartState?.discount || 0,
+                settings?.pos_settings?.currency_decimals || 2
+              )
+            }}
+          </div>
+        </div>
+        <div class="flex flex-col text-center">
+          <div class="text-xs">Subtotal</div>
+          <div class="text-xs">
+            {{
+              getDecimalNumber(
+                selected_order?.cartState?.totalAmount || 0,
+                settings?.pos_settings?.currency_decimals || 2
+              )
+            }}
+          </div>
+        </div>
+        <div class="flex flex-col text-center">
+          <div class="text-xs">Tax</div>
+          <div class="text-xs">
+            {{
+              getDecimalNumber(
+                selected_order?.cartState?.tax || 0,
+                settings?.pos_settings?.currency_decimals || 2
+              )
+            }}
+          </div>
+        </div>
+        <div class="col-span-5 border-t"></div>
+        <button
+          @click="printInvoice"
+          class="col-span-2 flex items-center gap-1"
+        >
+          <unicon :height="32" :width="32" name="print" fill="white"></unicon>
+          <p>Reciept</p>
+        </button>
+        <div class="col-span-2"></div>
+        <div class="flex flex-col text-center p-2">
+          <div class="text-xl">Total:</div>
+          <div class="text-xl">
+            {{
+              getDecimalNumber(
+                selected_order?.cartState?.totalAmount || 0,
+                settings?.pos_settings?.currency_decimals || 2
+              )
+            }}
+          </div>
+        </div>
+        <div class="flex w-full col-span-5 gap-2">
+          <button
+            v-if="selected_order?.is_synced == 0"
+            @click="sync"
+            class="bg-white w-full text-red-600 font-bold rounded-lg"
+          >
+            Sync
+          </button>
+          <button
+            @click="show_order_details = false"
+            class="bg-white w-full text-primary font-bold rounded-lg"
+          >
+            Back To Orders
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script setup>
+import { useMainStore } from "@/stores/main";
+import { storeToRefs } from "pinia";
+import { ref } from "vue";
+import { generateInvoice } from "@/lib/GenerateInvoice";
+import OrderItem from "@/components/OrderItem.vue";
+import getDecimalNumber from "@/lib/getDecimalNumber";
+import { useToast } from "vue-toast-notification";
+const store = useMainStore();
+const { addOrder } = store;
+const { order_list, settings } = storeToRefs(store);
+const selected_order = ref(order_list.value[0]);
+const show_order_details = ref(false);
+const openOrder = (order) => {
+  selected_order.value = order;
+  show_order_details.value = true;
+};
+const $toast = useToast();
+const sync = async () => {
+  const data = await addOrder({ ...selected_order.value, isSync: true });
+  $toast.open({
+    type: data?.success ? "success" : "error",
+    message: data?.message,
+    position: "top",
+    duration: 800,
+  });
+};
+const printInvoice = async () => {
+  try {
+    await generateInvoice({
+      order: selected_order.value,
+      settings: settings.value,
+      print_settings: settings.value?.print_settings,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
+</script>

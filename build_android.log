@@ -1,0 +1,151 @@
+=== Android Build Script ===
+Date: শুক্রবার 01 আগস্ট 2025 06:56:16 অপরাহ্ণ +06
+
+-> Vue project detected at: .
+
+Run npm install? [y/N] -> Skipping npm install
+-> Building Vue (npm run build)...
+
+> jaka-mobile@0.1.0 build
+> vite build
+
+vite v6.2.3 building for production...
+transforming...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+src/views/Settings.vue (15:7): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/views/Settings.vue (15:7): "default" is not exported by "src/lib/db/database.js", imported by "src/views/Settings.vue".
+✓ 479 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                   0.63 kB │ gzip:   0.40 kB
+dist/assets/Calibri-Arabic-Bold-DdeG89HK.ttf  1,562.34 kB
+dist/assets/AboutView-CSIvawM9.css                0.09 kB │ gzip:   0.10 kB
+dist/assets/index-xuOHf7Qo.css                   41.98 kB │ gzip:   8.52 kB
+dist/assets/AboutView-CGhTrkK0.js                 0.23 kB │ gzip:   0.20 kB
+dist/assets/purify.es-C_uT9hQ1.js                21.98 kB │ gzip:   8.74 kB
+dist/assets/index.es-2FcozUmg.js                158.61 kB │ gzip:  53.07 kB
+dist/assets/index-Dow6gne4.js                 1,416.15 kB │ gzip: 449.90 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.76s
+
+-> Copying dist/ → ../jaka-cordova/www/
+
+-> Ensuring Android platform in jaka-cordova
+
+-> Building Android APK (cordova build android --release)
+Checking Java JDK and Android SDK versions
+ANDROID_HOME=/home/fahimaloy/Android/Sdk (recommended setting)
+ANDROID_SDK_ROOT=/home/fahimaloy/Android/Sdk (DEPRECATED)
+Using Android SDK: /home/fahimaloy/Android/Sdk
+> Task :wrapper UP-TO-DATE
+
+BUILD SUCCESSFUL in 420ms
+1 actionable task: 1 up-to-date
+Subproject Path: CordovaLib
+Subproject Path: app
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:generateReleaseResValues
+> Task :CordovaLib:preBuild UP-TO-DATE
+> Task :CordovaLib:preReleaseBuild UP-TO-DATE
+> Task :CordovaLib:generateReleaseResValues
+> Task :CordovaLib:generateReleaseResources
+> Task :CordovaLib:packageReleaseResources
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:generateReleaseResources
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease
+> Task :CordovaLib:extractDeepLinksRelease
+> Task :CordovaLib:writeReleaseAarMetadata
+> Task :CordovaLib:processReleaseManifest
+> Task :app:packageReleaseResources
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :app:processApplicationManifestReleaseForBundle
+> Task :app:checkReleaseAarMetadata
+> Task :app:parseReleaseLocalResources
+> Task :CordovaLib:compileReleaseLibraryResources
+> Task :CordovaLib:parseReleaseLocalResources
+> Task :app:extractReleaseVersionControlInfo
+> Task :CordovaLib:javaPreCompileRelease
+> Task :CordovaLib:generateReleaseRFile
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:mergeReleaseResources
+
+> Task :CordovaLib:compileReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:generateReleaseBuildConfig
+> Task :app:javaPreCompileRelease
+> Task :app:processReleaseManifestForPackage
+> Task :CordovaLib:bundleLibRuntimeToJarRelease
+> Task :CordovaLib:bundleLibCompileToJarRelease
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:mergeReleaseShaders
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :CordovaLib:mergeReleaseShaders
+> Task :CordovaLib:compileReleaseShaders NO-SOURCE
+> Task :CordovaLib:generateReleaseAssets UP-TO-DATE
+> Task :CordovaLib:packageReleaseAssets
+> Task :app:desugarReleaseFileDependencies
+> Task :app:mergeReleaseAssets
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :CordovaLib:processReleaseJavaRes
+> Task :app:mergeReleaseJniLibFolders
+> Task :CordovaLib:mergeReleaseJniLibFolders
+> Task :CordovaLib:mergeReleaseNativeLibs NO-SOURCE
+> Task :CordovaLib:copyReleaseJniLibsProjectOnly
+> Task :app:writeReleaseAppMetadata
+> Task :CordovaLib:prepareReleaseArtProfile UP-TO-DATE
+> Task :app:mergeReleaseArtProfile
+> Task :app:mergeReleaseNativeLibs
+> Task :app:collectReleaseDependencies
+> Task :app:configureReleaseDependencies
+> Task :app:parseReleaseIntegrityConfig UP-TO-DATE
+> Task :app:stripReleaseDebugSymbols
+> Task :app:extractReleaseNativeSymbolTables
+> Task :app:mergeReleaseJavaResource
+> Task :app:processReleaseResources
+
+> Task :app:compileReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /home/fahimaloy/Projects/Jaka/jaka-pos-mob/jaka-cordova/platforms/android/app/src/main/java/org/apache/cordova/file/AssetFilesystem.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :app:bundleReleaseResources
+> Task :app:dexBuilderRelease
+> Task :app:mergeReleaseGlobalSynthetics
+> Task :app:mergeExtDexRelease
+> Task :app:mergeDexRelease
+> Task :app:buildReleasePreBundle
+> Task :app:compileReleaseArtProfile
+> Task :app:packageReleaseBundle
+> Task :app:signReleaseBundle
+> Task :app:produceReleaseBundleIdeListingFile
+> Task :app:createReleaseBundleListingFileRedirect
+> Task :app:bundleRelease
+
+[Incubating] Problems report is available at: file:///home/fahimaloy/Projects/Jaka/jaka-pos-mob/jaka-cordova/platforms/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.13/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3s
+63 actionable tasks: 60 executed, 3 up-to-date
+Built the following bundle(s): 
+	/home/fahimaloy/Projects/Jaka/jaka-pos-mob/jaka-cordova/platforms/android/app/build/outputs/bundle/release/app-release.aab
+
+✅ SUCCESS: APK at /home/fahimaloy/Projects/Jaka/jaka-pos-mob/jaka-cordova/platforms/android/app/build/outputs/apk
+▶ Full log: /home/fahimaloy/Projects/Jaka/jaka-pos-mob/jaka-cordova/build_android.log
