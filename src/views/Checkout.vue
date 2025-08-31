@@ -1,11 +1,11 @@
 <template>
-  <div class="h-full min-h-0 w-full flex flex-col overflow-hidden bg-white">
+  <div class="h-full min-h-0 w-full flex flex-col overflow-hidden bg-gradient-to-br from-bg-warm via-bg-light to-primary/5">
     <!-- Top bar -->
-    <div class="shrink-0 px-4 py-3 border-b border-slate-200 bg-white">
-      <div class="flex items-center justify-between gap-2">
+    <div class="shrink-0 px-6 py-4 bg-white/90 backdrop-blur-sm border-b border-primary/20 shadow-sm">
+      <div class="flex items-center justify-between gap-4">
         <button
           @click="goBackToCart"
-          class="inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-slate-800 bg-slate-100 hover:bg-slate-200 active:translate-y-[1px] text-base font-semibold"
+          class="inline-flex items-center gap-3 rounded-2xl px-6 py-3 text-gray-700 bg-white hover:bg-gray-50 active:translate-y-[1px] text-base font-semibold shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200"
           title="Back to Cart"
         >
           <svg
@@ -25,13 +25,21 @@
           Cart
         </button>
 
-        <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight">
-          Checkout
-        </h3>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none">
+              <path d="M3 7h18v10H3z" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <h3 class="text-3xl font-extrabold text-text-warm tracking-tight">
+            Checkout
+          </h3>
+        </div>
 
         <button
           @click="goHome"
-          class="inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-slate-800 bg-slate-100 hover:bg-slate-200 active:translate-y-[1px] text-base font-semibold"
+          class="inline-flex items-center gap-3 rounded-2xl px-6 py-3 text-gray-700 bg-white hover:bg-gray-50 active:translate-y-[1px] text-base font-semibold shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200"
           title="Back to Home"
         >
           <svg
@@ -62,14 +70,25 @@
 
     <!-- Body (scrolls if needed) -->
     <div class="flex-1 min-h-0 overflow-y-auto">
-      <div class="max-w-3xl mx-auto px-4 py-4 md:py-6 space-y-6">
+      <div class="max-w-4xl mx-auto px-6 py-6 space-y-8">
         <!-- Total -->
         <div
-          class="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 md:p-6"
+          class="rounded-3xl border border-primary/20 bg-white/90 backdrop-blur-sm shadow-xl p-6 md:p-8 transform hover:scale-[1.02] transition-all duration-300"
         >
           <div class="flex items-center justify-between">
-            <div class="text-slate-600 text-base">Total Payable</div>
-            <div class="text-3xl md:text-4xl font-extrabold text-slate-900">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-gradient-to-r from-success to-food-green rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <div>
+                <div class="text-gray-600 text-lg font-medium">Total Payable</div>
+                <div class="text-sm text-gray-500">Including taxes and fees</div>
+              </div>
+            </div>
+            <div class="text-4xl md:text-5xl font-extrabold text-gray-900">
               {{ currency }}
               {{ getDecimalNumber(cartState?.totalPayableAmount, decimals) }}
             </div>
@@ -78,9 +97,20 @@
 
         <!-- Payment Methods -->
         <div
-          class="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 md:p-6"
+          class="rounded-3xl border border-accent/20 bg-white/90 backdrop-blur-sm shadow-xl p-6 md:p-8"
         >
-          <div class="text-slate-900 font-bold mb-3">Select Payment Method</div>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-r from-accent to-warning rounded-full flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none">
+                <path d="M3 7h18v10H3z" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold text-text-warm">Payment Method</h3>
+              <p class="text-text-muted">Choose your preferred payment option</p>
+            </div>
+          </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <!-- Visa -->
@@ -170,7 +200,7 @@
         <button
           :disabled="disabledBtn || !payment_method"
           @click="placeOrder"
-          class="w-full h-16 md:h-18 rounded-2xl px-6 text-white text-xl font-extrabold shadow disabled:opacity-60 disabled:cursor-not-allowed bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 active:translate-y-[1px]"
+          class="w-full h-16 md:h-18 rounded-2xl px-6 text-white text-xl font-extrabold shadow disabled:opacity-60 disabled:cursor-not-allowed bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary-dark active:translate-y-[1px] transition-all duration-300"
         >
           {{ disabledBtn ? "Placing Order..." : "Place Order" }}
         </button>
@@ -198,7 +228,7 @@ import { computed, ref, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "vue-toast-notification";
 import Alert from "../components/Alert.vue";
-import { ORDERSTATES, PAYMENTSTATUS } from "@/lib/conf";
+import { ORDERSTATES, PAYMENTSTATUS } from "@/lib/constants";
 import moment from "moment";
 import getDecimalNumber from "@/lib/getDecimalNumber";
 import PACKAGE_JSON from "../../package.json";
@@ -207,7 +237,7 @@ const store = useMainStore();
 const $toast = useToast();
 const router = useRouter();
 
-const { addCashAmount, resetCart, addOrder, pos_device, selectOrderType } =
+const { addCashAmount, resetCart, placeKioskOrder, pos_device, selectOrderType } =
   store;
 
 const {
@@ -367,7 +397,7 @@ const getInvoicePrefix = (prefix) => {
   return "";
 };
 
-/* Place order (kept, with UI flow simplified) */
+/* Simplified kiosk order placement */
 const placeOrder = async () => {
   if (disabledBtn.value) return;
 
@@ -379,33 +409,7 @@ const placeOrder = async () => {
   disabledBtn.value = true;
   show_confirmation.value = false;
 
-  // Minimal validations
-  if (pos_login_type.value && !payment_method.value) {
-    $toast.open({
-      type: "warning",
-      message: "Select Payment Method",
-      position: "top",
-      duration: 500,
-    });
-    disabledBtn.value = false;
-    return;
-  }
-  if (pos_login_type.value && payment_method.value === "CASH") {
-    // ensure tendered covers total
-    if (
-      !cartState.value?.amountTendered ||
-      cartState.value.amountTendered < cartState.value.totalPayableAmount
-    ) {
-      $toast.open({
-        type: "warning",
-        message: "Tendered amount is less than total",
-        position: "top",
-        duration: 700,
-      });
-      disabledBtn.value = false;
-      return;
-    }
-  }
+  // Basic validation
   if (!cartItems.value || cartItems.value.length === 0) {
     $toast.open({
       type: "warning",
@@ -417,97 +421,84 @@ const placeOrder = async () => {
     return;
   }
 
-  const time = new Date().getTime();
-  let invoice_count = localStorage.getItem("invoice_count") || null;
-  invoice_count = invoice_count ? parseInt(invoice_count) + 1 : 1;
-
-  const LTNRT = localStorage.getItem("LTNRT") || null;
-  const token_counter = generateTokenCounter(
-    LTNRT ? new Date(parseInt(LTNRT)) : null,
-    new Date(time)
-  );
-
-  const ptid = `${settings.value?.pos_device?.id || ""}-${time}`;
-
-  // Map brand → method name in settings
-  let desiredName =
-    payment_method.value === "CARD"
-      ? "CARD"
-      : payment_method.value === "CASH"
-      ? "CASH"
-      : "Credit";
-
-  let pmObj;
-  if (settings.value?.payment_methods?.length) {
-    pmObj = settings.value.payment_methods.find(
-      (pm) => (pm.name || "").toUpperCase() === desiredName
-    );
+  // Debug customer object
+  console.log('Selected customer:', selected_customer.value);
+  console.log('Customer phone:', selected_customer.value?.phone);
+  console.log('Customer name:', selected_customer.value?.name);
+  
+  if (!selected_customer.value) {
+    console.log('No customer object found');
+    $toast.open({
+      type: "warning", 
+      message: "Please enter your phone number first",
+      position: "top",
+      duration: 1000,
+    });
+    disabledBtn.value = false;
+    // Navigate back to home to enter phone number
+    router.push("/home");
+    return;
   }
-  if (!pmObj) pmObj = { id: null, name: desiredName };
 
-  const invoice_num = `${
-    settings.value?.pos_device?.id || ""
-  }-${moment().format("YYMMDD")}-${invoice_count}`;
-  const invoicePrefix = settings?.pos_device?.invoice_prefix
-    ? getInvoicePrefix(settings.value.pos_device.invoice_prefix)
-    : "";
-
-  const payload = {
-    ptid,
-    id: pos_login_type.value ? token_counter : invoice_num,
-    shift_id: shiftUser.value?.id,
-    time,
-    invoice_num,
-    jaka_pos_version: PACKAGE_JSON?.version,
-    order_source: "Store",
-    paymentMethod: pmObj.name.toUpperCase(),
-    payment_method_id: pmObj.id,
-    customer: selected_customer.value || undefined,
-    store_id: settings.value?.merchant?.id,
-    is_synced: 0,
-    user: user_data.value,
-    token_no: `${invoicePrefix}${token_counter}`,
-    token_counter: `${invoicePrefix}${token_counter}`,
-    table: selectedTable.value,
-    cartState: { ...cartState.value, orderitems: cartItems.value },
-    paymentStatus: PAYMENTSTATUS.PENDING,
-    orderStatus: ORDERSTATES.PENDING,
-    discount: cartState.value?.discount || 0.0,
-    charges: 0,
-    pos_device: settings.value?.pos_device,
-    total: cartState.value.totalPayableAmount,
-    notes: notes.value || null,
-    // Keep a simple order type fallback
-    type: selectedType.value,
-    order_type: pos_login_type.value ? selectedType.value?.name : "carhop",
-  };
+  if (!selected_customer.value.phone && !selected_customer.value.name) {
+    console.log('Customer object missing both phone and name');
+    $toast.open({
+      type: "warning", 
+      message: "Customer phone number is missing",
+      position: "top",
+      duration: 1000,
+    });
+    disabledBtn.value = false;
+    // Navigate back to home to re-enter phone number
+    router.push("/home");
+    return;
+  }
 
   try {
-    const data = await addOrder(payload);
-    if (data && data?.message) {
+    const paymentInfo = {
+      method: payment_method.value,
+      brand: payment_brand.value
+    };
+    // Use phone if available, otherwise use name (which is the formatted phone)
+    const customerPhone = selected_customer.value.phone || selected_customer.value.name;
+    const result = await placeKioskOrder(customerPhone, paymentInfo);
+    
+    if (result.success) {
+      // Clear cart first
+      clearCart();
+      
+      // Trigger order confirmation screen with order details
+      if (window.handleOrderComplete) {
+        window.handleOrderComplete(result.orderNumber || result.ptid || result.invoice_num);
+      } else {
+        // Fallback: navigate to home and show success toast
+        $toast.open({
+          type: "success",
+          message: "Order placed successfully!",
+          position: "top",
+          duration: 1500,
+        });
+        setTimeout(() => {
+          router.push("/home");
+        }, 1500);
+      }
+    } else {
       $toast.open({
-        type: data?.success ? "success" : "error",
-        message: data.message,
+        type: "error",
+        message: result.message || "Failed to place order",
         position: "top",
         duration: 2000,
       });
     }
-    if (data?.success) {
-      resetCart();
-      if (order_types.value.length) selectOrderType(order_types.value[0]?.id);
-      router.push("/home");
-    }
   } catch (e) {
+    console.error("Checkout error:", e);
     $toast.open({
       type: "error",
-      message: e?.response?.data
-        ? JSON.stringify(e.response.data)
-        : "Some Error Occurred!",
+      message: "Network error. Please try again.",
       position: "top",
       duration: 2000,
     });
   } finally {
-    localStorage.setItem("invoice_count", invoice_count);
     disabledBtn.value = false;
   }
 };

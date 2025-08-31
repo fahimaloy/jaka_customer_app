@@ -12,11 +12,8 @@
     <div
       class="flex items-center justify-between px-5 py-4 border-b border-slate-200"
     >
-      <div class="flex items-center gap-3">
+      <div class="flex-1 flex justify-center">
         <img src="/jaka-logo.png" class="h-9 w-auto" alt="JakaCloud" />
-        <span class="text-base font-extrabold text-slate-900 tracking-tight"
-          >Menu</span
-        >
       </div>
       <button
         @click="emit('close')"
@@ -42,8 +39,11 @@
 
     <!-- Quick device strip (subtle, kiosk-friendly) -->
     <div class="px-5 pt-3 pb-2">
-      <div
-        class="rounded-xl bg-gradient-to-r from-sky-50 to-emerald-50 border border-slate-200 px-3 py-2 flex items-center gap-2"
+      <a 
+        href="https://jakacloud.com" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        class="block rounded-xl bg-gradient-to-r from-sky-50 to-emerald-50 border border-slate-200 px-3 py-2 flex items-center gap-2 hover:from-sky-100 hover:to-emerald-100 transition-all duration-200 cursor-pointer"
       >
         <span
           class="inline-flex items-center justify-center rounded-lg bg-white ring-1 ring-slate-200 h-7 w-7"
@@ -66,9 +66,9 @@
         </span>
         <div class="text-[11px] leading-4 text-slate-600">
           <div class="font-semibold text-slate-800">Jaka POS</div>
-          <div class="opacity-80">Tap to navigate quickly</div>
+          <div class="opacity-80">Visit jakacloud.com</div>
         </div>
-      </div>
+      </a>
     </div>
 
     <!-- Nav -->
@@ -177,12 +177,12 @@ function isActive(path) {
 
 function activeClass(path) {
   return isActive(path)
-    ? "bg-slate-900 text-white border-slate-900 ring-1 ring-black/0"
-    : "bg-white text-slate-800 border-slate-200 hover:bg-slate-50";
+    ? "bg-gradient-to-r from-primary to-secondary text-white border-primary ring-1 ring-primary/50 shadow-lg"
+    : "bg-white text-text-warm border-slate-200 hover:bg-bg-warm hover:border-primary/20";
 }
 
 function iconTint(path) {
-  return isActive(path) ? "text-white" : "text-slate-700";
+  return isActive(path) ? "text-white bg-white/15" : "text-primary bg-primary/10";
 }
 </script>
 
@@ -212,8 +212,11 @@ function iconTint(path) {
   height: 28px;
   width: 28px;
   border-radius: 8px;
-  background: var(--icon-bg, #ffffff);
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+  transition: all 0.2s ease;
+}
+
+.nav-icon svg {
+  transition: all 0.2s ease;
 }
 .nav-text {
   font-size: 15px;

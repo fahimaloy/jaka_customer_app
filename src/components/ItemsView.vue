@@ -3,6 +3,7 @@
 <script setup>
 import { useMainStore } from "@/stores/main";
 import SingleItem from "./SingleItem.vue";
+import KeyboardModal from "./KeyboardModal.vue";
 import { onMounted, ref, watch, computed, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
@@ -10,7 +11,7 @@ import { useToast } from "vue-toast-notification";
 import getDecimalNumber from "@/lib/getDecimalNumber";
 
 const store = useMainStore();
-const { filterItems, addToCart, clearCart } = store;
+const { filterItems, addToCart, clearCart, searchItems } = store;
 const { filteredItems, cartItems, cartState, selectedCategoryId, settings } =
   storeToRefs(store);
 
@@ -22,6 +23,7 @@ const $toast = useToast();
 
 const q = ref("");
 const isSearching = ref(false);
+const showSearchKeyboard = ref(false);
 
 // debounce
 let t;
@@ -43,7 +45,14 @@ watch(selectedCategoryId, () => {
 const applyFilter = debounce(async () => {
   isSearching.value = true;
   await nextTick();
-  filterItems();
+  
+  // Use searchItems if there's a query, otherwise use filterItems
+  if (q.value && q.value.trim()) {
+    await searchItems(q.value.trim());
+  } else {
+    await filterItems();
+  }
+  
   isSearching.value = false;
 }, 250);
 
@@ -95,34 +104,38 @@ function goToCart() {
 <template>
   <!-- Make this component its own flex column with a single scroll area -->
   <div class="relative h-full w-full flex flex-col overflow-hidden">
-    <!-- bg stripes -->
+    <!-- Enhanced bg pattern -->
     <div
-      class="pointer-events-none absolute inset-0 -z-10 opacity-[0.045]"
+      class="pointer-events-none absolute inset-0 -z-10 opacity-[0.08]"
       style="
         background: repeating-linear-gradient(
           135deg,
-          #9de1ff 0px,
-          #9de1ff 6px,
-          #ffe59d 6px,
-          #ffe59d 12px,
-          #ffd1e1 12px,
-          #ffd1e1 18px
+          #FF6B35 0px,
+          #FF6B35 8px,
+          #FFB52A 8px,
+          #FFB52A 16px,
+          #FF4757 16px,
+          #FF4757 24px,
+          #6C5CE7 24px,
+          #6C5CE7 32px
         );
       "
     />
 
-    <!-- Sticky header (does not scroll) -->
+    <!-- Enhanced Sticky header -->
     <div
-      class="shrink-0 sticky top-0 z-10 bg-gradient-to-b from-white/95 to-white/70 backdrop-blur px-3 pt-2 pb-3 border-b border-slate-100"
+      class="shrink-0 sticky top-0 z-10 bg-gradient-to-b from-bg-warm/95 to-white/90 backdrop-blur-xl px-3 pt-2 pb-3 border-b border-primary/20 shadow-sm"
     >
       <div class="flex items-center gap-2">
         <div class="flex-1">
           <label class="relative block">
             <input
               v-model="q"
+              @focus="showSearchKeyboard = true"
               type="text"
               placeholder="Search dishes, codes, notes…"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none shadow-sm focus:ring-2 focus:ring-sky-300"
+              class="w-full rounded-xl border border-primary/30 bg-white/90 backdrop-blur-sm px-3 py-2.5 text-sm outline-none shadow-sm focus:ring-2 focus:ring-primary/50 focus:border-primary/60 transition-all duration-200"
+              readonly
             />
             <span
               v-if="isSearching"
@@ -134,7 +147,7 @@ function goToCart() {
         </div>
 
         <button
-          class="shrink-0 rounded-full px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 transition"
+          class="shrink-0 rounded-full px-3 py-2 text-xs font-semibold text-white bg-gradient-to-r from-danger to-danger hover:from-danger hover:to-secondary-dark active:scale-95 transition-all duration-200 shadow-md"
           @click="clearCartItems"
           title="Clear cart"
         >
@@ -167,11 +180,11 @@ function goToCart() {
         class="flex flex-col items-center justify-center gap-3 text-center py-16"
       >
         <div
-          class="size-16 rounded-2xl bg-gradient-to-br from-sky-200 to-emerald-200 flex items-center justify-center shadow-inner"
+          class="size-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shadow-lg border border-primary/30"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="size-8"
+            class="size-8 text-primary"
             viewBox="0 0 24 24"
             fill="none"
           >
@@ -182,9 +195,9 @@ function goToCart() {
             />
           </svg>
         </div>
-        <div class="text-slate-800 font-semibold">No items match</div>
-        <p class="text-sm text-slate-500">
-          Try another category or tweak the search.
+        <div class="text-text-warm font-bold text-lg">No delicious items match</div>
+        <p class="text-sm text-text-muted">
+          🔍 Try another category or adjust your search.
         </p>
       </div>
     </div>
@@ -194,13 +207,13 @@ function goToCart() {
       v-if="Number(ItemsQtyCount) > 0"
       class="fixed inset-x-0 md:bottom-4 bottom-4 z-50 px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.25rem)] pointer-events-none"
     >
-      <!-- Backdrop card to ensure contrast and clickability -->
+      <!-- Enhanced backdrop card -->
       <div
-        class="mx-auto w-full max-w-md rounded-2xl bg-white/80 backdrop-blur-md shadow-lg ring-1 ring-black/5 pointer-events-auto"
+        class="mx-auto w-full max-w-md rounded-2xl bg-overlay-light backdrop-blur-xl shadow-2xl ring-1 ring-white/20 pointer-events-auto border border-primary/20"
       >
         <button
           @click="goToCart"
-          class="w-full rounded-xl px-4 py-4 text-white text-lg font-extrabold shadow-md active:translate-y-[1px] transition bg-sky-600 hover:bg-sky-700 active:bg-sky-800"
+          class="w-full rounded-xl px-4 py-4 text-white text-lg font-extrabold shadow-lg active:translate-y-[1px] transition-all duration-200 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary-dark active:scale-95 transform hover:scale-105"
         >
           {{ currency }} {{ cartTotal }} • {{ ItemsQtyCount }} item<span
             v-if="ItemsQtyCount != 1"
@@ -210,6 +223,15 @@ function goToCart() {
         </button>
       </div>
     </div>
+    
+    <!-- Search Keyboard Modal -->
+    <KeyboardModal
+      v-if="showSearchKeyboard"
+      v-model:value="q"
+      @close="showSearchKeyboard = false"
+      title="Search Items"
+      placeholder="Search dishes, codes, notes..."
+    />
   </div>
 </template>
 

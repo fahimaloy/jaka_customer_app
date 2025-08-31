@@ -34,7 +34,7 @@ import {
   uniDraggabledots,
 } from "vue-unicons/dist/icons";
 import ToastPlugin from "vue-toast-notification";
-import "vue-toast-notification/dist/theme-bootstrap.css";
+import "vue-toast-notification/dist/theme-default.css";
 import piniaPersistedState from "pinia-plugin-persistedstate";
 
 Unicon.add([
@@ -68,7 +68,14 @@ const app = createApp(App);
 const pinia = createPinia();
 pinia.use(piniaPersistedState);
 app.use(pinia);
-app.use(ToastPlugin);
+app.use(ToastPlugin, {
+  position: 'top-right',
+  duration: 4000,
+  dismissible: true,
+  pauseOnHover: true,
+  queue: true,
+  max: 5
+});
 app.use(router);
 app.use(Unicon);
 app.mount("#app");

@@ -47,6 +47,8 @@ function prepareItemForInsert(item) {
     modifiers = [],
     barcode = null,
     units = [],
+    slideshow = false,
+    image_url = null,
     // is_favourite = false,
     // multibarcodes = [],
   } = item;
@@ -98,6 +100,8 @@ function prepareItemForInsert(item) {
     modifiers: JSON.stringify(modifiers),
     barcode,
     units: JSON.stringify(units),
+    slideshow: slideshow ? 1 : 0,
+    image_url,
     // is_favourite: is_favourite ? 1 : 0,
     // multibarcodes, // left as-is (an array of objects with a "barcode" property)
   };
@@ -128,6 +132,7 @@ function parseRow(row) {
     ),
     allow_selling_price_change: Boolean(row.allow_selling_price_change),
     units: JSON.parse(row.units || "[]"),
+    slideshow: Boolean(row.slideshow),
   };
 }
 
@@ -232,7 +237,7 @@ export async function saveBulkItems(items, deleteAll = false) {
         wac, image, created_at, updated_at, category, item_group, item_brand, kot_device,
         available_locations, order_categories, price, is_tax_inclusive, selectedTab,
         default_price, isSpecial, charge, popup_modifier_while_adding_item_to_cart, allow_selling_price_change,
-        quantity, totalPrice, tax, special_prices, modifiers, barcode, units
+        quantity, totalPrice, tax, special_prices, modifiers, barcode, units, slideshow, image_url
       ) VALUES
       ${valuePlaceholders.join(",\n")}
     `;

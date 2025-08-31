@@ -1,11 +1,11 @@
 <template>
-  <!-- Item Card -->
+  <!-- Enhanced Item Card -->
   <div
     @click="openModal"
-    class="group relative cursor-pointer rounded-xl overflow-hidden transition-all duration-300 select-none"
+    class="group relative cursor-pointer rounded-xl overflow-hidden transition-all duration-300 select-none transform hover:scale-105 active:scale-95"
     :class="[
-      cartMatch ? 'ring-2 ring-primary shadow-xl' : 'shadow-md hover:shadow-lg',
-      'bg-white active:translate-y-[1px]',
+      cartMatch ? 'ring-2 ring-primary shadow-2xl ring-offset-2 ring-offset-primary/10' : 'shadow-lg hover:shadow-xl',
+      'bg-white/90 backdrop-blur-sm border border-primary/10 hover:border-primary/30',
     ]"
   >
     <!-- Hover splash from top-right -->
@@ -34,18 +34,17 @@
         {{ initials }}
       </div>
 
-      <!-- Quantity pill if in cart -->
+      <!-- Enhanced quantity pill if in cart -->
       <div
         v-if="cartMatch?.quantity"
-        class="absolute left-3 top-3 text-xs font-semibold bg-white/90 backdrop-blur px-2 py-1 rounded-full shadow"
+        class="absolute left-3 top-3 text-xs font-bold bg-gradient-to-r from-success to-success-light text-white backdrop-blur-sm px-3 py-2 rounded-full shadow-lg border border-white/30"
       >
         In cart: {{ cartMatch.quantity }}
       </div>
 
-      <!-- Corner price tag -->
+      <!-- Enhanced corner price tag -->
       <div
-        class="absolute bottom-0 right-0 m-2 px-2.5 py-1 rounded-full text-xs font-bold text-white shadow"
-        :style="{ background: pricePillColor }"
+        class="absolute bottom-0 right-0 m-2 px-3 py-2 rounded-full text-sm font-bold text-white shadow-lg bg-gradient-to-r from-primary to-secondary backdrop-blur-sm border border-white/30"
       >
         {{ currency }}
         {{
@@ -57,28 +56,28 @@
       </div>
     </div>
 
-    <!-- Body -->
-    <div class="p-3">
+    <!-- Enhanced Body -->
+    <div class="p-4 bg-gradient-to-b from-white/95 to-bg-warm/80">
       <div class="flex items-start justify-between gap-2">
         <div class="min-w-0">
           <div
-            class="text-sm font-extrabold tracking-wide text-slate-800 leading-5 line-clamp-2"
+            class="text-sm font-extrabold tracking-wide text-text-warm leading-5 line-clamp-2"
           >
             {{ item.name }}
           </div>
 
           <div
             v-if="settings?.pos_settings?.show_item_code_in_menu"
-            class="text-[11px] text-slate-500 mt-0.5"
+            class="text-[11px] text-text-muted mt-0.5 font-medium"
           >
             {{ item?.item_code }}
           </div>
         </div>
 
-        <!-- Tiny status dot (fun accent) -->
+        <!-- Enhanced status dot -->
         <span class="mt-0.5 inline-flex items-center justify-center">
           <span
-            class="size-2.5 rounded-full"
+            class="size-3 rounded-full shadow-sm border border-white/50"
             :style="{ background: dotColor }"
           ></span>
         </span>
@@ -170,15 +169,15 @@ const initials = computed(() => {
   return parts.map((p) => p[0]?.toUpperCase()).join("");
 });
 
-// fun color helpers
+// vibrant restaurant color helpers
 const palette = [
-  ["#f97316", "#fb923c"], // orange
-  ["#22c55e", "#4ade80"], // green
-  ["#06b6d4", "#22d3ee"], // cyan
-  ["#a855f7", "#c084fc"], // purple
-  ["#ef4444", "#f87171"], // red
-  ["#eab308", "#facc15"], // amber
-  ["#0ea5e9", "#38bdf8"], // sky
+  ["#FF6B35", "#FF8B5A"], // Primary gradient
+  ["#FFB52A", "#FF9500"], // Accent gradient  
+  ["#FF4757", "#FF3742"], // Secondary gradient
+  ["#6C5CE7", "#A29BFE"], // Tertiary gradient
+  ["#00D4AA", "#26F0C7"], // Success gradient
+  ["#FF6348", "#FF6B9D"], // Food gradient
+  ["#FFD93D", "#FFB52A"], // Warning gradient
 ];
 
 function hash(str) {
@@ -201,13 +200,13 @@ const dotColor = computed(() => c2);
 // playful hover splash
 const splashColor = computed(() => c2 + "55");
 
-// optional tag colors for meta chips
+// vibrant tag colors for meta chips
 const tagColors = [
-  "#0ea5e9", // sky
-  "#f59e0b", // amber
-  "#10b981", // emerald
-  "#a855f7", // purple
-  "#ef4444", // red
+  "#FF6B35", // primary
+  "#FFB52A", // accent
+  "#00D4AA", // success
+  "#6C5CE7", // tertiary
+  "#FF4757", // secondary
 ];
 
 // open the modal

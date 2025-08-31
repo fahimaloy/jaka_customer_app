@@ -176,6 +176,12 @@ pub fn run() {
             sql: "ALTER TABLE items ADD COLUMN image_url TEXT NULL;",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 7,
+            description: "Add slideshow field to items",
+            sql: "ALTER TABLE items ADD COLUMN slideshow INTEGER DEFAULT 0;",
+            kind: MigrationKind::Up,
+        },
     ];
 
     // let mut builder =

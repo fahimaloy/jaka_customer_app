@@ -142,104 +142,106 @@ const canSubmit = computed(() => !!email.value && !!password.value);
   />
 
   <!-- Login Page -->
-  <div v-else class="min-h-screen w-full bg-slate-50">
-    <div class="mx-auto max-w-md px-4 py-10">
+  <div v-else class="min-h-screen w-full bg-gradient-to-br from-bg-warm via-bg-light to-primary/5 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
       <!-- Card -->
       <div
-        class="rounded-2xl bg-white shadow-sm ring-1 ring-black/5 overflow-hidden"
+        class="rounded-3xl bg-white/95 backdrop-blur-sm shadow-2xl border border-primary/20 overflow-hidden transform animate-bounce-in"
       >
         <!-- Header inside the card -->
-        <div class="px-6 pt-8 pb-4 text-center">
-          <img
-            src="/jaka-logo.png"
-            class="mx-auto h-14 w-auto"
-            alt="Jaka"
-            decoding="async"
-          />
-          <h1 class="mt-4 text-xl font-semibold text-slate-900">
-            Sign in to Jaka Kiosk
+        <div class="px-8 pt-8 pb-6 text-center bg-gradient-to-br from-primary/10 via-bg-warm to-accent/5 border-b border-primary/20">
+          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 shadow-xl bg-gradient-to-r from-primary to-secondary border-4 border-white/30">
+            <img
+              src="/jaka-logo.png"
+              class="h-12 w-auto filter brightness-0 invert"
+              alt="Jaka"
+              decoding="async"
+            />
+          </div>
+          <h1 class="text-2xl font-extrabold text-text-warm mb-2">
+            🍽️ Welcome to Jaka Kiosk
           </h1>
-          <p class="mt-1 text-sm text-slate-500">
-            Use your store account to continue
+          <p class="text-sm text-text-muted">
+            Sign in to manage your restaurant
           </p>
         </div>
 
         <!-- Form -->
-        <div class="px-6 pb-6">
+        <div class="px-8 pb-8 pt-6">
           <!-- Email -->
-          <label class="block text-xs font-medium text-slate-600 mb-1"
-            >Email</label
+          <label class="block text-sm font-bold text-text-warm mb-2"
+            >📧 Email Address</label
           >
           <div
-            class="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 focus-within:ring-2 focus-within:ring-sky-500 transition"
+            class="mb-6 flex items-center gap-3 rounded-2xl border-2 border-primary/30 bg-white/90 backdrop-blur-sm px-4 py-4 focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary/60 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <unicon
-              :height="22"
-              :width="22"
+              :height="24"
+              :width="24"
               name="envelope-alt"
-              class="text-slate-400"
+              class="text-primary"
             />
             <input
               v-model="email"
               type="email"
-              placeholder="name@store.com"
-              class="w-full bg-transparent outline-none text-sm text-slate-900 placeholder-slate-400"
+              placeholder="manager@restaurant.com"
+              class="w-full bg-transparent outline-none text-base text-text-warm placeholder-text-muted font-medium"
               autocomplete="email"
             />
           </div>
 
           <!-- Password -->
-          <label class="block text-xs font-medium text-slate-600 mb-1"
-            >Password</label
+          <label class="block text-sm font-bold text-text-warm mb-2"
+            >🔐 Password</label
           >
           <div
-            class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 focus-within:ring-2 focus-within:ring-sky-500 transition"
+            class="mb-6 flex items-center gap-3 rounded-2xl border-2 border-primary/30 bg-white/90 backdrop-blur-sm px-4 py-4 focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary/60 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <unicon
-              :height="22"
-              :width="22"
+              :height="24"
+              :width="24"
               name="key-skeleton"
-              class="text-slate-400"
+              class="text-primary"
             />
             <input
               v-model="password"
               :type="show_password ? 'text' : 'password'"
-              placeholder="••••••••"
-              class="w-full bg-transparent outline-none text-sm text-slate-900 placeholder-slate-400"
+              placeholder="Enter your password"
+              class="w-full bg-transparent outline-none text-base text-text-warm placeholder-text-muted font-medium"
               autocomplete="current-password"
               @keyup.enter="canSubmit && !loginLoading && login(false)"
             />
             <button
               type="button"
-              class="p-1 rounded-md text-slate-500 hover:text-slate-700"
+              class="p-2 rounded-xl text-text-muted hover:text-primary hover:bg-primary/10 transition-all duration-200"
               @click="show_password = !show_password"
               :aria-label="show_password ? 'Hide password' : 'Show password'"
             >
               <unicon
-                :height="20"
-                :width="20"
+                :height="22"
+                :width="22"
                 :name="show_password ? 'eye-slash' : 'eye'"
               />
             </button>
           </div>
 
           <!-- Options -->
-          <div class="mt-3 mb-5 flex items-center justify-between">
+          <div class="mb-6 flex items-center justify-between">
             <label
-              class="inline-flex items-center gap-2 text-sm text-slate-600"
+              class="inline-flex items-center gap-3 text-sm font-semibold text-text-warm cursor-pointer"
             >
               <input
                 v-model="remember"
                 type="checkbox"
-                class="rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                class="w-5 h-5 rounded-lg border-2 border-primary/30 text-primary focus:ring-primary/50 focus:ring-2 bg-white/90"
               />
-              Remember me
+              💾 Remember me
             </label>
             <RouterLink
               to="/help"
-              class="text-sm font-medium text-slate-600 hover:text-slate-800"
+              class="text-sm font-semibold text-primary hover:text-primary-dark transition-colors duration-200"
             >
-              Need help?
+              🆘 Need help?
             </RouterLink>
           </div>
 
@@ -247,21 +249,21 @@ const canSubmit = computed(() => !!email.value && !!password.value);
           <button
             @click="() => login(false)"
             :disabled="loginLoading || !canSubmit"
-            class="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed bg-slate-900 hover:bg-slate-800 active:bg-slate-950 transition shadow-sm"
+            class="w-full inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-4 text-white text-lg font-extrabold disabled:opacity-60 disabled:cursor-not-allowed bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary-dark active:translate-y-[1px] transition-all duration-300 shadow-lg hover:shadow-xl animate-pulse-glow"
           >
             <span v-if="loginLoading" class="loader" />
-            {{ loginLoading ? "Signing In…" : "Sign In" }}
+            {{ loginLoading ? "🔄 Signing In…" : "🚀 Sign In" }}
           </button>
         </div>
       </div>
 
       <!-- Danger zone -->
-      <div class="mt-6 text-center">
+      <div class="mt-8 text-center">
         <button
           @click="RESET"
-          class="rounded-lg px-3.5 py-2 text-[12px] font-medium text-white bg-red-600 hover:bg-red-700 active:bg-red-800 shadow-sm"
+          class="rounded-2xl px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-danger to-secondary hover:from-danger hover:to-secondary-dark active:translate-y-[1px] transition-all duration-300 shadow-lg hover:shadow-xl"
         >
-          Factory Reset
+          ⚠️ Factory Reset
         </button>
       </div>
 
@@ -279,16 +281,53 @@ const canSubmit = computed(() => !!email.value && !!password.value);
 
 <style scoped>
 .loader {
-  width: 18px;
-  height: 18px;
-  border: 2.5px solid;
+  width: 20px;
+  height: 20px;
+  border: 3px solid;
   border-color: #ffffff transparent;
   border-radius: 9999px;
   animation: rotation 0.8s linear infinite;
 }
+
 @keyframes rotation {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Custom pulse glow animation */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 0 10px rgba(255, 107, 53, 0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Bounce in animation */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s ease-out;
 }
 </style>

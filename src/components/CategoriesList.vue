@@ -55,13 +55,12 @@ function hashString(str) {
   return Math.abs(h);
 }
 const palette = [
-  ["#0ea5e9", "#38bdf8"],
-  ["#22c55e", "#4ade80"],
-  ["#f59e0b", "#fbbf24"],
-  ["#a855f7", "#c084fc"],
-  ["#ef4444", "#f87171"],
-  ["#06b6d4", "#22d3ee"],
-  ["#10b981", "#34d399"],
+  ["#FF6B35", "#FF8B5A"], // Primary gradient
+  ["#FFB52A", "#FF9500"], // Accent gradient  
+  ["#FF4757", "#FF3742"], // Secondary gradient
+  ["#6C5CE7", "#A29BFE"], // Tertiary gradient
+  ["#00D4AA", "#26F0C7"], // Success gradient
+  ["#FF6348", "#FF6B9D"], // Food gradient
 ];
 function gradientFor(name) {
   const idx = hashString(name || "x") % palette.length;
@@ -72,7 +71,7 @@ function gradientFor(name) {
 
 <template>
   <!-- Do NOT make this a scroller; the <aside> in HomeView scrolls -->
-  <div class="flex flex-col bg-white shadow h-full overflow-hidden">
+  <div class="flex flex-col bg-gradient-to-b from-bg-warm to-white shadow-xl h-full overflow-hidden border-r border-primary/10">
     <div
       v-if="categoriesList && categoriesList.length"
       class="p-2 overflow-y-scroll space-y-2.5 pt-20 pb-32"
@@ -82,11 +81,11 @@ function gradientFor(name) {
         :key="category.id"
         type="button"
         @click="setSelectedCategoryId(category.id)"
-        class="w-full cursor-pointer rounded-xl px-3 py-3 transition border flex items-center gap-3 text-left"
+        class="w-full cursor-pointer rounded-xl px-3 py-3 transition-all duration-200 border flex items-center gap-3 text-left transform hover:scale-105 active:scale-95"
         :class="
           isSelected(category.id)
-            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-            : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200'
+            ? 'bg-gradient-to-r from-primary to-secondary text-white border-primary shadow-lg ring-2 ring-primary/30'
+            : 'bg-white/80 hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 text-text-warm border-primary/20 hover:border-primary/40 backdrop-blur-sm hover:shadow-md'
         "
       >
         <!-- Thumbnail -->

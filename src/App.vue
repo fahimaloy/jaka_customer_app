@@ -23,7 +23,7 @@
   </div>
 
   <!-- Main shell -->
-  <div v-else class="bg-gray-100 h-full w-full min-h-screen">
+  <div v-else class="bg-gradient-to-br from-bg-warm via-bg-light to-primary/5 h-full w-full min-h-screen">
     <!-- Make the app shell a column and prevent page scroll -->
     <div class="relative h-screen overflow-hidden flex flex-col">
       <!-- Drawer Sidebar -->
@@ -50,7 +50,7 @@
           <button
             type="button"
             @click="toggleSidebar"
-            class="fixed top-4 left-4 z-[80] rounded-full bg-white text-slate-800 shadow-md ring-1 ring-slate-200 hover:bg-slate-50 active:translate-y-[1px] p-3"
+            class="fixed top-4 left-4 z-[80] rounded-full bg-gradient-to-r from-primary to-secondary text-white shadow-xl ring-1 ring-white/20 hover:from-primary-dark hover:to-secondary-dark active:translate-y-[1px] backdrop-blur-sm p-3 transition-all duration-200"
             title="Open menu"
           >
             <svg
@@ -159,11 +159,15 @@ const checkRouterRestrictriction = () => {
   } else if (authenticated.value && shiftUser.value == null) {
     if (pos_login_type.value) router.push("/shift-login");
     else if (!pos_login_type.value && !defaultLocation.value)
-      router.push("/home");
+      router.push("/default-location");
     else if (!pos_login_type.value && defaultLocation.value)
       router.push("/home");
   } else if (authenticated.value && shiftUser.value) {
-    router.push("/home");
+    if (!defaultLocation.value) {
+      router.push("/default-location");
+    } else {
+      router.push("/home");
+    }
   }
 };
 
@@ -306,3 +310,73 @@ const initSecondWebSocket = (deviceId, versionNumber) => {
   }
 };
 </script>
+
+<style>
+/* Global scrollbar styling for better restaurant UX */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1BA390 #f3f4f6;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #1BA390, #16a085);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #16a085, #138a7a);
+}
+
+/* Enhanced animations for restaurant feel */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(27, 163, 144, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(27, 163, 144, 0.6), 0 0 30px rgba(27, 163, 144, 0.4);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Restaurant-themed focus styles */
+.focus-restaurant:focus {
+  outline: none;
+  ring: 3px;
+  ring-color: rgba(251, 146, 60, 0.5);
+  border-color: #1BA390;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.2);
+}
+</style>

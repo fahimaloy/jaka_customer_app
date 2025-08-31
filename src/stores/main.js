@@ -4,6 +4,7 @@ import axios from "axios";
 import moment from "moment";
 import calculatePriceAndTax, { formatDecimalToEighth } from "@/lib/calculate";
 import { TABLESTATES } from "@/lib/conf";
+import { ORDERSTATES, PAYMENTSTATUS } from "@/lib/constants";
 import { bulkCreateCustomers, getCustomersList } from "../lib/db/customers";
 import { getItemsByQuery, saveBulkItems } from "../lib/db/items";
 
@@ -60,7 +61,7 @@ export const useMainStore = defineStore(
           },
         };
         const URL = `${baseURL.value}/${
-          isRecentItems ? "recent-items" : "item-category"
+          isRecentItems ? "recent-items" : "aggregators-items"
         }`;
         const response = await axios.post(URL, {}, HEADERS);
         const data = response?.data;
@@ -818,10 +819,16 @@ export const useMainStore = defineStore(
         delete payload.isSync;
       }
       if (!pos_login_type.value) {
-        payload.location = "callcenter";
+        payload.location = defaultLocation.value ? defaultLocation.value.name : "callcenter";
         payload.paymentMethod = "Credit";
         payload.order_source = "carhop";
         payload.paymentStatus = "pending";
+      } else {
+        // For kiosk mode, always include selected location if available
+        if (defaultLocation.value) {
+          payload.location = defaultLocation.value.name;
+          payload.location_id = defaultLocation.value.id;
+        }
       }
 
       if (navigator.onLine) {
@@ -916,6 +923,176 @@ export const useMainStore = defineStore(
       }
       selected_customer.value = null;
     };
+
+    // Create customer function
+    const createCustomer = async (phone) => {
+      try {
+        const payload = {
+          data: {
+            name: phone,
+            phone: phone.replace(/\D/g, ''), // Store digits only
+            language: "English"
+          }
+        };
+        
+        const response = await axios.post(
+          `${baseURL.value}/create-customer`,
+          payload,
+          {
+            headers: {
+              Authorization: token.value || localStorage.getItem("token"),
+              'Content-Type': 'application/json'
+            },
+          }
+        );
+        
+        console.log('Customer creation response:', response.data);
+        return {
+          success: true,
+          customer: response.data
+        };
+      } catch (error) {
+        console.log('Customer creation failed (continuing with flow):', error);
+        return {
+          success: false,
+          error: error
+        };
+      }
+    };
+
+    // Simple kiosk order without SQL saving
+    const placeKioskOrder = async (customerPhone, paymentInfo = null) => {
+      // Determine payment method and status
+      const paymentMethod = paymentInfo?.method === 'CASH' ? 'Cash' : 'Card';
+      const paymentBrand = paymentInfo?.brand || null;
+      const isCOD = paymentInfo?.method === 'CASH';
+      
+      // Generate unique identifiers
+      const currentTime = Date.now();
+      const ptid = `${user_data.value?.id || 'kiosk'}-${currentTime}`;
+      const invoiceId = `CC_${user_data.value?.id || 'K'}-${new Date().toLocaleDateString('en-GB').replace(/\//g, '')}-${Math.floor(currentTime / 1000)}`;
+      
+      const payload = {
+        cartState: {
+          orderitems: cartItems.value.map(item => ({
+            id: item.id,
+            item_code: item.item_code || item.id?.toString(),
+            name: item.name,
+            selling_price: item.selling_price || item.price,
+            totalPrice: item.totalPrice,
+            quantity: item.quantity,
+            tax_percent: item.tax_percent || 0,
+            discount_amount: item.discount_amount || null,
+            discount_percentage: item.discount_percentage || null,
+            modifiers: item.modifiers || [],
+            note: item.note || null
+          })),
+          totalAmount: cartState.value.totalAmount,
+          tax: cartState.value.tax,
+          discount: cartState.value.discount || 0,
+          totalPayableAmount: cartState.value.totalPayableAmount,
+          paymentMethod: paymentMethod,
+          discount_note: null
+        },
+        notes: null,
+        order_type: "TAKE AWAY",
+        order_source: "kiosk",
+        orderStatus: "pending",
+        id: invoiceId,
+        ptid: ptid,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "+0300",
+        time: currentTime,
+        location: {
+          id: defaultLocation.value?.id || 1,
+          name: defaultLocation.value?.name || "kiosk",
+          arabic_name: defaultLocation.value?.arabic_name || null
+        },
+        paymentMethod: paymentMethod,
+        paymentStatus: isCOD ? PAYMENTSTATUS.PENDING : PAYMENTSTATUS.PAID,
+        customer: {
+          phone: customerPhone.replace(/\D/g, ''),
+          name: customerPhone
+        },
+        store_id: settings.value?.store?.id || 1,
+        user: {
+          id: user_data.value?.id || 1,
+          username: user_data.value?.username || "kiosk@jaka.live",
+          name: user_data.value?.name || "Kiosk User"
+        },
+        total: cartState.value.totalPayableAmount?.toFixed(2) || "0.00"
+      };
+
+      try {
+        console.log('Kiosk Order Payload:', payload);
+        console.log('Order Status:', payload.orderStatus);
+        console.log('Payment Status:', payload.paymentStatus);
+        
+        const OrderURL = `${baseURL.value}/kiosk-order`;
+        const response = await axios.post(
+          OrderURL,
+          { data: payload },
+          {
+            headers: {
+              Authorization: token.value || localStorage.getItem("token"),
+            },
+          }
+        );
+
+        if (response?.data?.success) {
+          return {
+            success: true,
+            orderNumber: response?.data?.unique_id || response?.data?.order_id || payload.ptid,
+            ptid: response?.data?.ptid || payload.ptid,
+            invoice_num: response?.data?.invoice_num || payload.id,
+            total_payable_amount: response?.data?.total_payable_amount || payload.total,
+            business_date: response?.data?.business_date,
+            message: response?.data?.message || "Order placed successfully"
+          };
+        } else {
+          return {
+            success: false,
+            message: response?.data?.message || "Failed to place order"
+          };
+        }
+      } catch (error) {
+        console.error("Kiosk order error:", error);
+        return {
+          success: false,
+          message: error?.response?.data?.message || "Network error"
+        };
+      }
+    };
+
+    // Reset all kiosk state
+    const resetKioskState = () => {
+      selected_customer.value = null;
+      cartItems.value = [];
+      cartState.value = {
+        totalAmount: 0,
+        totalPayableAmount: 0,
+        amountTendered: 0,
+        amountToBeReturned: 0,
+        tax: 0,
+        discount: 0,
+        discount_note: null,
+        charges: 0,
+      };
+    };
+
+    // Clear cart but preserve customer for navigation
+    const clearCartOnly = () => {
+      cartItems.value = [];
+      cartState.value = {
+        totalAmount: 0,
+        totalPayableAmount: 0,
+        amountTendered: 0,
+        amountToBeReturned: 0,
+        tax: 0,
+        discount: 0,
+        discount_note: null,
+        charges: 0,
+      };
+    };
     const customerSync = ref({
       status: false,
       total: 0,
@@ -960,112 +1137,7 @@ export const useMainStore = defineStore(
       selected_customer.value = cust;
     };
 
-    const fetchCustomers = async () => {
-      syncStatus.value.slug = "customers";
-      syncStatus.value.completed = false;
-      try {
-        const HEADERS = {
-          headers: {
-            Authorization: token.value || localStorage.getItem("token"),
-          },
-        };
-        const URL = `${baseURL.value}/get-store-customers`;
-        const response = await axios.post(URL, {}, HEADERS);
-        const data = response?.data;
-        console.log("NEW CUSTOMER RESPONSE: ", response);
-        const COUNT = data?.count;
-        const customers = data?.results.data.store_customers;
-        let syncedCount = customers?.length;
-        syncStatus.value.total = COUNT;
-        syncStatus.value.synced = customers?.length;
-
-        const allCustomers =
-          customers && customers?.length
-            ? customers.map((el) => {
-                return {
-                  _id: el?.id.toString(),
-                  id: el?.id,
-                  search_name: el?.name.toLowerCase(),
-                  ...el,
-                };
-              })
-            : [];
-        addCustomers(allCustomers, true);
-        try {
-          await bulkCreateCustomers(allCustomers, true);
-          console.log("SQL - Saved Customers");
-        } catch (e) {
-          console.log("SQL - Error Saving Items: ", e);
-          console.error(e);
-        }
-        let nextRoute = data?.next;
-        while (nextRoute) {
-          const loopResponse = await axios.post(nextRoute, {}, HEADERS);
-          console.log("RESPONSE: ", loopResponse);
-          const loopAllItems =
-            loopResponse?.data?.results?.data?.storestore_customers &&
-            loopResponse?.data?.results?.data?.storestore_customers?.length
-              ? loopResponse?.data?.results?.data?.store_customers.map(
-                  (el, index) => {
-                    return {
-                      _id: el?.id.toString(),
-                      id: el?.id,
-                      search_name: el?.name.toLowerCase(),
-                      ...el,
-                    };
-                  }
-                )
-              : [];
-          console.log(
-            "CUSTOMERS FROM NEW API: ",
-            loopAllItems,
-            "ROUTE: ",
-            nextRoute
-          );
-          syncedCount = syncedCount + loopAllItems?.length;
-
-          syncStatus.value.synced = syncedCount;
-          nextRoute = loopResponse?.data?.next;
-          addCustomers(allCustomers, false);
-
-          try {
-            await bulkCreateCustomers(allCustomers, false);
-            console.log("SQL - Saved Customers");
-          } catch (e) {
-            console.log("SQL - Error Saving Items: ", e);
-            console.error(e);
-          }
-        }
-        syncStatus.value.completed = true;
-
-        setTimeout(() => {
-          setSyncStatus({
-            slug: null,
-            total: "∞",
-            synced: 0,
-            completed: false,
-          });
-        }, 500);
-        return syncedCount;
-      } catch (error) {
-        setTimeout(() => {
-          setSyncStatus({
-            slug: null,
-            total: "∞",
-            synced: 0,
-            completed: false,
-          });
-        }, 500);
-        if (
-          error?.response?.data?.detail ==
-          "Authentication credentials were not provided."
-        ) {
-          forceLogout.value = true;
-        }
-        console.log("Error Occurred During Fetching Customers: \n", error);
-        console.error(error);
-      }
-    };
+    // Customer syncing removed for kiosk mode
     const logoutForcefully = () => {
       // initialToken.value = null;
       shiftUser.value = null;
@@ -1231,6 +1303,21 @@ export const useMainStore = defineStore(
         console.log(e);
       }
       // return response;
+    };
+
+    const fetchCustomers = async () => {
+      try {
+        console.log("Fetching customers...");
+        const response = await getCustomersList();
+        console.log("Customers Response:", response);
+        if (response?.success) {
+          console.log("Customers fetched successfully: ", response.result);
+          customer_list.value = response.result;
+        }
+      } catch (e) {
+        console.log("Error fetching customers:", e);
+        console.log(e);
+      }
     };
 
     const fetchFloorNTables = async () => {
@@ -1684,8 +1771,9 @@ export const useMainStore = defineStore(
       pos_login_type.value = payload;
     };
     const defaultLocation = ref(null);
-    const setDefaultLocation = (payload) => {
-      defaultLocation.value = payload;
+    const setDefaultLocation = (locationId) => {
+      const selectedLocation = locations.value.find(loc => loc.id === locationId);
+      defaultLocation.value = selectedLocation;
     };
     return {
       location,
@@ -1769,6 +1857,10 @@ export const useMainStore = defineStore(
       set_pos_login_type,
       defaultLocation,
       setDefaultLocation,
+      createCustomer,
+      placeKioskOrder,
+      resetKioskState,
+      clearCartOnly,
     };
   },
   {

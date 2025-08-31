@@ -82,21 +82,14 @@
               <div class="control">
                 <label class="label">Price</label>
                 <input
-                  :disabled="
-                    !settings?.pos_settings?.allow_selling_price_change
-                  "
+                  disabled
                   type="number"
                   v-model.number="sellingPrice"
-                  class="input text-center"
+                  class="input text-center bg-gray-50 cursor-not-allowed"
                   min="0"
+                  readonly
                 />
-                <div class="hint">
-                  {{
-                    settings?.pos_settings?.allow_selling_price_change
-                      ? "editable"
-                      : "locked"
-                  }}
-                </div>
+                <div class="hint">locked</div>
               </div>
 
               <!-- Quantity stepper -->
@@ -114,10 +107,13 @@
                     –
                   </button>
                   <input
+                    ref="quantityInput"
                     type="number"
                     v-model.number="quantity"
-                    class="w-full text-center px-2 py-2 outline-none"
-                    min="0"
+                    @focus="showNumpad = true"
+                    class="w-full text-center px-2 py-2 outline-none focus:bg-primary/5"
+                    min="1"
+                    readonly
                   />
                   <button
                     @click="increment"
@@ -136,8 +132,10 @@
                 <input
                   type="number"
                   v-model.number="totalPrice"
-                  class="input text-center"
+                  @focus="showNumpad = true"
+                  class="input text-center focus:bg-primary/5"
                   min="0"
+                  readonly
                 />
                 <div class="hint">{{ currency }}</div>
               </div>
@@ -199,9 +197,11 @@
               <h4 class="section-title">Notes</h4>
               <textarea
                 v-model="notes"
+                @focus="showKeyboard = true"
                 class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300"
                 rows="2"
                 placeholder="Add a note (e.g., extra spicy, no onions)…"
+                readonly
               ></textarea>
             </div>
           </div>
@@ -210,23 +210,12 @@
           <div
             class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-100 px-4 sm:px-6 py-3"
           >
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-2 gap-3">
               <button
                 @click="close"
                 class="btn-outline text-red-700 border-red-300 hover:bg-red-50"
               >
                 Cancel
-              </button>
-
-              <button
-                @click="
-                  router.push(
-                    `/items/edit/${encodeURIComponent(JSON.stringify(item))}`
-                  )
-                "
-                class="btn-outline text-sky-700 border-sky-300 hover:bg-sky-50"
-              >
-                Edit Item
               </button>
 
               <button
@@ -248,17 +237,38 @@
             ✕
           </button>
         </div>
+        
+        <!-- Numpad Modal -->
+        <NumpadModal
+          v-if="showNumpad"
+          v-model:value="quantity"
+          @close="showNumpad = false"
+          title="Enter Quantity"
+          :min="1"
+          :max="999"
+        />
+
+        <!-- Keyboard Modal -->
+        <KeyboardModal
+          v-if="showKeyboard"
+          v-model:value="notes"
+          @close="showKeyboard = false"
+          title="Special Instructions"
+          placeholder="Enter any special requests..."
+        />
       </div>
     </transition>
   </teleport>
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, ref, watch, onMounted, nextTick } from "vue";
 import { useMainStore } from "@/stores/main";
 import { storeToRefs } from "pinia";
 import getDecimalNumber from "@/lib/getDecimalNumber";
 import { useRouter } from "vue-router";
+import NumpadModal from "./NumpadModal.vue";
+import KeyboardModal from "./KeyboardModal.vue";
 const router = useRouter();
 
 const props = defineProps({
@@ -331,6 +341,9 @@ const sellingPrice = ref(props.item.selling_price || 0);
 const selectedModifiers = ref([]);
 const selectedUnit = ref(null);
 const notes = ref("");
+const showNumpad = ref(false);
+const showKeyboard = ref(false);
+const quantityInput = ref(null);
 const cartMatch = computed(
   () => cartItems.value.find((ci) => ci.id === props.item.id) || null
 );
@@ -346,7 +359,7 @@ const totalPrice = computed({
 // on open
 watch(
   () => props.show,
-  (val) => {
+  async (val) => {
     if (val) {
       quantity.value = cartMatch.value?.quantity || props.item.quantity || 1;
       sellingPrice.value =
