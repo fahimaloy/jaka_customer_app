@@ -25,7 +25,6 @@ export const useMainStore = defineStore(
     });
     const selectedCategoryId = ref(0);
     const all_items = ref([]);
-    const shiftUser = ref(null);
     const all_categories = ref([]);
     const user_data = ref(null);
     const baseURL = ref(null);
@@ -190,10 +189,9 @@ export const useMainStore = defineStore(
     };
 
     const storeLogin = async (
-      { email, password, pos_license_key },
-      URLEnd = "store-login",
-      pinLogin = null
+      { email, password, pos_license_key }
     ) => {
+      const URLEnd = 'callcenter-login'
       forceLogout.value = false;
       try {
         console.log(baseURL.value);
@@ -202,93 +200,47 @@ export const useMainStore = defineStore(
           const URL = `https://${base}/api`;
           baseURL.value = URL;
         }
-        let payload;
-        if (pinLogin) {
-          payload = {
-            email,
-            access_pin: pinLogin,
-            pos_license_key: pos_key.value,
-            token: initialToken.value,
-          };
-        } else {
-          payload = {
-            email,
-            password,
-            pos_license_key: pos_login_type.value ? pos_license_key : undefined,
-          };
-          if (initialToken.value) {
-            payload.token = initialToken.value;
-          }
+        let payload = {
+          email,
+          password,
+        };
+        if (initialToken.value) {
+          payload.token = initialToken.value;
         }
         let HEADERS = {
           Authorization: initialToken.value ? initialToken.value : null,
         };
         const response = await axios.post(
-          `${baseURL.value}/${
-            pos_login_type.value ? URLEnd : "callcenter-login"
-          }`,
+          `${baseURL.value}/callcenter-login`,
           payload,
           {
             headers: HEADERS,
           }
         );
-        if (response?.data?.success == true && response?.data?.data) {
-          locations.value = response?.data?.data?.locations || [];
-          location_users.value = response?.data?.data?.location_users || [];
-          merchant.value = response?.data?.data?.merchant || null;
-          token.value = response?.data?.data?.token || null;
-          if (!pos_login_type.value) {
+        if (response?.data?.success == true) {
+          if (response?.data?.data) {
+            locations.value = response?.data?.data?.locations || [];
+            location_users.value = response?.data?.data?.location_users || [];
+            merchant.value = response?.data?.data?.merchant || null;
+            token.value = response?.data?.data?.token || null;
             initialToken.value = response?.data?.data?.tokens?.access;
             token.value = response?.data?.data?.tokens?.access;
-          } else if (!pinLogin) {
-            initialToken.value = response?.data?.data?.token;
-          }
-          user_data.value = response?.data?.data?.user || [];
-          location.value = response?.data?.data?.location;
-          pos_device.value = response?.data?.data?.pos_device || null;
-          if (pos_license_key) pos_key.value = pos_license_key;
-          if (pinLogin && user_data.value) {
-            await axios
-              .post(
-                baseURL.value + "/open-shift",
-                {
-                  user: response?.data?.data?.user?.id,
-                  location: response?.data?.data?.location.id,
-                  pos_device: response?.data?.data?.pos_device?.id,
-                },
-                {
-                  headers: {
-                    Authorization: `${initialToken.value}`,
-                  },
-                }
-              )
-              .then(async (data) => {
-                shiftUser.value = Object.assign(
-                  {},
-                  {
-                    id: data.data.shift_id,
-                    location_user_id: user_data.value.id,
-                    shiftStart: moment().format("YYYY/MM/DD  h:mm a"),
-                  },
-                  {
-                    pin: pinLogin,
-                  }
-                );
-              })
-              .catch((error) => {
-                if (
-                  error?.response?.data?.detail ==
-                  "Authentication credentials were not provided."
-                ) {
-                  forceLogout.value = true;
-                }
-              });
-          }
-          if (token.value) {
-            localStorage.setItem("token", token.value);
-          } else {
+            user_data.value = response?.data?.data?.user || [];
+            // For call center login, there might not be a specific location, use first available location
+            location.value = response?.data?.data?.location || (response?.data?.data?.locations?.[0]) || null;
+            pos_device.value = response?.data?.data?.pos_device || null;
+            if (pos_license_key) pos_key.value = pos_license_key;
+            if (token.value) {
+              localStorage.setItem("token", token.value);
+            }
           }
           return { success: true, error: false };
+        } else {
+          console.log("Login failed - API returned success: false");
+          return {
+            error: true,
+            errorMsg: "Login failed - invalid response from server",
+          };
         }
       } catch (error) {
         authenticated.value = false;
@@ -333,35 +285,8 @@ export const useMainStore = defineStore(
       }
     };
     // const getStoreSettings = async ({pos})
-    const shiftLogout = async (summary) => {
-      authenticated.value = true;
-      try {
-        await axios.post(
-          `${baseURL.value}/close-shift`,
-          {
-            token: initialToken.value,
-            shift_id: shiftUser.value?.id,
-            user: user_data.value?.id,
-            location: location.value?.id,
-            ...summary,
-            pos_device: pos_device.value.id,
-          },
-          {
-            headers: {
-              Authorization: initialToken.value,
-            },
-          }
-        );
-      } catch (e) {
-        alert("Error While Shifting Out!");
-        console.log(e);
-      }
-      shiftUser.value = null;
-      return 0;
-    };
     const posLogout = () => {
       all_items.value = [];
-      shiftUser.value = null;
       all_categories.value = [];
       user_data.value = null;
       baseURL.value = null;
@@ -369,7 +294,6 @@ export const useMainStore = defineStore(
       location_users.value = [];
       merchant.value = null;
       token.value = null;
-      pos_login_type.value = true;
       defaultLocation.value = null;
       authenticated.value = false;
     };
@@ -818,18 +742,10 @@ export const useMainStore = defineStore(
       if (payload?.isSync) {
         delete payload.isSync;
       }
-      if (!pos_login_type.value) {
-        payload.location = defaultLocation.value ? defaultLocation.value.name : "callcenter";
-        payload.paymentMethod = "Credit";
-        payload.order_source = "carhop";
-        payload.paymentStatus = "pending";
-      } else {
-        // For kiosk mode, always include selected location if available
-        if (defaultLocation.value) {
-          payload.location = defaultLocation.value.name;
-          payload.location_id = defaultLocation.value.id;
-        }
-      }
+      payload.location = defaultLocation.value ? defaultLocation.value.name : "callcenter";
+      payload.paymentMethod = "Credit";
+      payload.order_source = "carhop";
+      payload.paymentStatus = "pending";
 
       if (navigator.onLine) {
         try {
@@ -1140,7 +1056,6 @@ export const useMainStore = defineStore(
     // Customer syncing removed for kiosk mode
     const logoutForcefully = () => {
       // initialToken.value = null;
-      shiftUser.value = null;
       user_data.value = null;
       localStorage.setItem("token", token.value);
       authenticated.value = false;
@@ -1200,7 +1115,7 @@ export const useMainStore = defineStore(
           address: payload?.address || "",
           tax_reg_num: payload?.tax_reg_num || "",
           pos_id: settings.value?.pos_device?.id,
-          user_id: shiftUser.value?.location_user_id,
+          user_id: user_data.value?.id,
           location_id: defaultLocation.value
             ? locations.value.find((el) => el.id == defaultLocation.value)
             : settings.value?.location?.id,
@@ -1745,7 +1660,6 @@ export const useMainStore = defineStore(
 
       selectedCategoryId.value = 0;
       all_items.value = [];
-      shiftUser.value = null;
       all_categories.value = [];
       user_data.value = null;
       baseURL.value = null;
@@ -1765,10 +1679,6 @@ export const useMainStore = defineStore(
     const a4Order = ref(null);
     const setA4Order = (order) => {
       a4Order.value = order;
-    };
-    const pos_login_type = ref(false);
-    const set_pos_login_type = (payload) => {
-      pos_login_type.value = payload;
     };
     const defaultLocation = ref(null);
     const setDefaultLocation = (locationId) => {
@@ -1792,9 +1702,7 @@ export const useMainStore = defineStore(
       selectedCategoryId,
       setSelectedCategoryId,
       location_users,
-      shiftUser,
       pos_key,
-      shiftLogout,
       posLogout,
       filterItems,
       filteredItems,
@@ -1853,8 +1761,6 @@ export const useMainStore = defineStore(
       factoryReset,
       a4Order,
       setA4Order,
-      pos_login_type,
-      set_pos_login_type,
       defaultLocation,
       setDefaultLocation,
       createCustomer,

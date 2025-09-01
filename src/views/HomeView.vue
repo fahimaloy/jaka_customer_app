@@ -127,8 +127,9 @@ const handleInactivityCancel = () => {
   resetToSlideshow()
 }
 
-const handleOrderComplete = (orderNum) => {
+const handleOrderComplete = (orderNum, details = {}) => {
   orderNumber.value = orderNum
+  orderDetails.value = details
   showOrderConfirmation.value = true
   clearAllTimers()
 }
@@ -208,6 +209,7 @@ onUnmounted(() => {
     <OrderConfirmationScreen
       v-if="showOrderConfirmation"
       :orderNumber="orderNumber"
+      :orderDetails="orderDetails"
       @close="handleConfirmationClose"
     />
   </div>

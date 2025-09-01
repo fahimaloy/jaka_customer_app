@@ -80,17 +80,19 @@ function avatarColorFor(name) {
           <!-- Selection indicator -->
           <div
             v-if="selectedId === loc.id"
-            class="absolute top-4 right-4 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg"
+            class="absolute top-4 right-4 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg ring-2 ring-primary/20"
           >
-            <unicon name="check" :height="20" :width="20" fill="#1BA390" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
           </div>
 
           <div class="p-8">
             <!-- Location Avatar -->
             <div 
               :class="[
-                'w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-4 mx-auto shadow-lg',
-                selectedId === loc.id ? 'bg-white text-primary' : avatarColorFor(loc.name)
+                'w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold mb-4 mx-auto shadow-lg',
+                selectedId === loc.id ? 'bg-primary text-white' : avatarColorFor(loc.name) + ' text-white'
               ]"
             >
               {{ initialsOf(loc.name) }}

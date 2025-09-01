@@ -97,23 +97,17 @@ const login = async (relogin = false) => {
     password: password.value,
   };
 
-  const loginResponse = await storeLogin(
-    payload,
-    relogin ? "store-re-login" : "store-login"
-  );
+  const loginResponse = await storeLogin(payload);
 
   loginLoading.value = false;
 
   if (loginResponse?.success) {
     $toast.open({ type: "success", message: "Signed in", position: "top" });
     await doSync();
-  } else if (loginResponse?.error && loginResponse?.errorMsg) {
+  } else if (loginResponse?.error) {
     $toast.open({
       type: "error",
-      message:
-        typeof loginResponse?.errorMsg === "string"
-          ? loginResponse?.errorMsg
-          : JSON.stringify(loginResponse?.errorMsg),
+      message: loginResponse?.errorMsg || "Login failed",
       position: "bottom",
     });
   }
@@ -150,10 +144,10 @@ const canSubmit = computed(() => !!email.value && !!password.value);
       >
         <!-- Header inside the card -->
         <div class="px-8 pt-8 pb-6 text-center bg-gradient-to-br from-primary/10 via-bg-warm to-accent/5 border-b border-primary/20">
-          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 shadow-xl bg-gradient-to-r from-primary to-secondary border-4 border-white/30">
+          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 shadow-xl bg-white border-4 border-primary/20">
             <img
-              src="/jaka-logo.png"
-              class="h-12 w-auto filter brightness-0 invert"
+              src="/jaka-bird.png"
+              class="h-12 w-auto"
               alt="Jaka"
               decoding="async"
             />

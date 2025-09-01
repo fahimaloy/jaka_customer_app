@@ -237,7 +237,7 @@ const store = useMainStore();
 const $toast = useToast();
 const router = useRouter();
 
-const { addCashAmount, resetCart, placeKioskOrder, pos_device, selectOrderType } =
+const { addCashAmount, resetCart, clearCart, placeKioskOrder, pos_device, selectOrderType } =
   store;
 
 const {
@@ -469,7 +469,7 @@ const placeOrder = async () => {
       
       // Trigger order confirmation screen with order details
       if (window.handleOrderComplete) {
-        window.handleOrderComplete(result.orderNumber || result.ptid || result.invoice_num);
+        window.handleOrderComplete(result.orderNumber || result.ptid || result.invoice_num, result);
       } else {
         // Fallback: navigate to home and show success toast
         $toast.open({

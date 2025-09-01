@@ -3,13 +3,11 @@ import HomeView from "../views/HomeView.vue";
 import Login from "@/views/Login.vue";
 import Registration from "@/views/Registration.vue";
 import PhoneLogin from "@/views/PhoneLogin.vue";
-import ShiftLogin from "@/views/ShiftLogin.vue";
 import Cart from "@/views/Cart.vue";
 import Checkout from "@/views/Checkout.vue";
 import Orders from "@/views/Orders.vue";
 import Customers from "@/views/Customers.vue";
 import Sync from "@/views/Sync.vue";
-import ShiftOut from "@/views/ShiftOut.vue";
 import Settings from "@/views/Settings.vue";
 import Tables from "@/views/Tables.vue";
 import ItemCU from "@/views/ItemCU.vue";
@@ -36,16 +34,6 @@ const router = createRouter({
       path: "/registration",
       name: "registration",
       component: Registration,
-    },
-    {
-      path: "/shift-login",
-      name: "shift-login",
-      component: ShiftLogin,
-    },
-    {
-      path: "/shift-out",
-      name: "shift-out",
-      component: ShiftOut,
     },
     {
       path: "/home",

@@ -123,12 +123,10 @@ const {
 
 const {
   authenticated,
-  shiftUser,
   settings,
   baseURL,
   syncCustomer,
   forceLogout,
-  pos_login_type,
   defaultLocation,
 } = storeToRefs(store);
 
@@ -152,27 +150,17 @@ const checkRouterRestrictriction = () => {
   if (
     !authenticated.value &&
     (route.fullPath != "/login" ||
-      route.fullPath != "/registration" ||
-      route.fullPath != "/shift-login")
+      route.fullPath != "/registration")
   ) {
     router.push("/login");
-  } else if (authenticated.value && shiftUser.value == null) {
-    if (pos_login_type.value) router.push("/shift-login");
-    else if (!pos_login_type.value && !defaultLocation.value)
-      router.push("/default-location");
-    else if (!pos_login_type.value && defaultLocation.value)
-      router.push("/home");
-  } else if (authenticated.value && shiftUser.value) {
-    if (!defaultLocation.value) {
-      router.push("/default-location");
-    } else {
-      router.push("/home");
-    }
+  } else if (authenticated.value && !defaultLocation.value) {
+    router.push("/default-location");
+  } else if (authenticated.value && defaultLocation.value) {
+    router.push("/home");
   }
 };
 
 watch(authenticated, checkRouterRestrictriction);
-watch(shiftUser, checkRouterRestrictriction);
 
 onMounted(() => {
   window.addEventListener("keydown", handleKeydown);
